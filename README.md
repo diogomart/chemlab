@@ -43,8 +43,25 @@ you may do with chemlab, from supporting a new file format to writing
 a new graphic renderer, even if you don'think it's perfect. Send me an
 email or write an issue on the github page.
 
-Installation
-------------
+Quick Installation
+------------------
+Follow these steps to quickly install the code and get started:
+
+    $ git clone https://github.com/sforli/chemlab.git
+
+    $ pip install pyqt5 cython pyopengl scipy dask h5py
+
+    $ cd chemlab
+    $ python setup.py build_ext --inplace
+
+    $ export PYTHONPATH=$PYTHONPATH:/path/to/chemlab/chemlab
+
+    $ cd chemlab/playground
+    $ python wata.py
+
+
+Installation (old, not working)
+-------------------------------
 
 TIP: more updated instructions are located in the docs:
      http://chemlab.readthedocs.org/en/latest/installation.html
