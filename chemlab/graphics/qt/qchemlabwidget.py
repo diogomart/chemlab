@@ -5,9 +5,9 @@ import time
 
 from PIL import Image as pil_Image
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import  Qt
-from PyQt4.QtOpenGL import QGLWidget
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import Qt
+from PyQt5.QtOpenGL import QGLWidget
 
 from OpenGL.GL import *
 from OpenGL.GL.framebufferobjects import *
@@ -18,9 +18,10 @@ from .. import colors
 
 DEFAULT_FRAMEBUFFER = 0
 
+
 class QChemlabWidget(QGLWidget):
-    '''Extensible and modular OpenGL widget developed using the Qt (PyQt4)
-    Framework. This widget can be used in other PyQt4 programs.
+    """Extensible and modular OpenGL widget developed using the Qt (PyQt5)
+    Framework. This widget can be used in other PyQt5 programs.
 
     The widget by itself doesn't draw anything, it delegates the
     writing task to external components called 'renderers' that expose
@@ -49,7 +50,7 @@ class QChemlabWidget(QGLWidget):
         widget.uis.append(TextUI(widget, 200, 200, 'Hello, world!'))
 
     .. warning:: At this point there is only one ui element available.
-                PyQt4 provides a lot of UI elements so there's the
+                PyQt5 provides a lot of UI elements so there's the
                 possibility that UI elements will be converted into renderers.
 
     QChemlabWidget has its own mouse gestures:
@@ -98,7 +99,7 @@ class QChemlabWidget(QGLWidget):
        color. Values for r,g,b,a are in the range [0, 255]. You can
        use the colors contained in chemlab.graphics.colors.
 
-    '''
+    """
 
     clicked = QtCore.pyqtSignal(object)
 
@@ -134,24 +135,26 @@ class QChemlabWidget(QGLWidget):
         # Those are the post-processing buffers
         self.fb0, self.fb1, self.fb2 = glGenFramebuffers(3)
 
-        self.textures = {'color': create_color_texture(self.fb0, self.width(), self.height()),
-                         'depth': create_depth_texture(self.fb0, self.width(), self.height()),
-                         'normal': create_normal_texture(self.fb0, self.width(), self.height())}
+        self.textures = {
+            "color": create_color_texture(self.fb0, self.width(), self.height()),
+            "depth": create_depth_texture(self.fb0, self.width(), self.height()),
+            "normal": create_normal_texture(self.fb0, self.width(), self.height()),
+        }
 
+        glDrawBuffers(
+            2, np.array([GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1], dtype="uint32")
+        )
 
+        if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+            raise Exception("Framebuffer is not complete")
 
-        glDrawBuffers(2, np.array([GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1], dtype='uint32'))
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER)
-            != GL_FRAMEBUFFER_COMPLETE):
-            raise Exception('Framebuffer is not complete')
-
-        self._extra_textures = {'fb1': create_color_texture(self.fb1, self.width(), self.height()),
-                                'fb2': create_color_texture(self.fb2, self.width(), self.height())}
-
+        self._extra_textures = {
+            "fb1": create_color_texture(self.fb1, self.width(), self.height()),
+            "fb2": create_color_texture(self.fb2, self.width(), self.height()),
+        }
 
     def paintGL(self):
-        '''GL function called each time a frame is drawn'''
+        """GL function called each time a frame is drawn"""
 
         if self.post_processing:
             # Render to the first framebuffer
@@ -159,23 +162,23 @@ class QChemlabWidget(QGLWidget):
             glViewport(0, 0, self.width(), self.height())
 
             status = glCheckFramebufferStatus(GL_FRAMEBUFFER)
-            if (status != GL_FRAMEBUFFER_COMPLETE):
-                reason = dict(GL_FRAMEBUFFER_UNDEFINED='UNDEFINED',
-                              GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT='INCOMPLETE_ATTACHMENT',
-                              GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT='INCOMPLETE_MISSING_ATTACHMENT',
-                              GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER='INCOMPLETE_DRAW_BUFFER',
-                              GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER='INCOMPLETE_READ_BUFFER',
-                              GL_FRAMEBUFFER_UNSUPPORTED='UNSUPPORTED',
-                          )[status]
+            if status != GL_FRAMEBUFFER_COMPLETE:
+                reason = dict(
+                    GL_FRAMEBUFFER_UNDEFINED="UNDEFINED",
+                    GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT="INCOMPLETE_ATTACHMENT",
+                    GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT="INCOMPLETE_MISSING_ATTACHMENT",
+                    GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER="INCOMPLETE_DRAW_BUFFER",
+                    GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER="INCOMPLETE_READ_BUFFER",
+                    GL_FRAMEBUFFER_UNSUPPORTED="UNSUPPORTED",
+                )[status]
 
-                raise Exception('Framebuffer is not complete: {}'.format(reason))
+                raise Exception("Framebuffer is not complete: {}".format(reason))
         else:
             glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_FRAMEBUFFER)
 
-
         # Clear color take floats
         bg_r, bg_g, bg_b, bg_a = self.background_color
-        glClearColor(bg_r/255, bg_g/255, bg_b/255, bg_a/255)
+        glClearColor(bg_r / 255, bg_g / 255, bg_b / 255, bg_a / 255)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         proj = self.camera.projection
@@ -184,8 +187,6 @@ class QChemlabWidget(QGLWidget):
         self.mvproj = np.dot(proj, cam)
 
         self.ldir = cam[:3, :3].T.dot(self.light_dir)
-
-
 
         # Draw World
         self.on_draw_world()
@@ -199,14 +200,14 @@ class QChemlabWidget(QGLWidget):
                 for i, pp in enumerate(self.post_processing[:-1]):
                     if i % 2:
                         outfb = self.fb1
-                        outtex = self._extra_textures['fb1']
+                        outtex = self._extra_textures["fb1"]
                     else:
                         outfb = self.fb2
-                        outtex = self._extra_textures['fb2']
+                        outtex = self._extra_textures["fb2"]
 
                     pp.render(outfb, newarg)
 
-                    newarg['color'] = outtex
+                    newarg["color"] = outtex
 
                 self.post_processing[-1].render(DEFAULT_FRAMEBUFFER, newarg)
 
@@ -217,27 +218,32 @@ class QChemlabWidget(QGLWidget):
         self.on_draw_ui()
 
     def resizeGL(self, w, h):
-
         glViewport(0, 0, w, h)
         self.camera.aspectratio = float(self.width()) / self.height()
 
         if self.post_processing:
             # We have to recreate all of our textures
-            self.textures['color'].delete()
-            self.textures['depth'].delete()
-            self.textures['normal'].delete()
+            self.textures["color"].delete()
+            self.textures["depth"].delete()
+            self.textures["normal"].delete()
 
-            self.textures = {'color': create_color_texture(self.fb0, self.width(), self.height()),
-                             'depth': create_depth_texture(self.fb0, self.width(), self.height()),
-                             'normal': create_normal_texture(self.fb0, self.width(), self.height())}
-            glDrawBuffers(2, np.array([GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1], dtype='uint32'))
+            self.textures = {
+                "color": create_color_texture(self.fb0, self.width(), self.height()),
+                "depth": create_depth_texture(self.fb0, self.width(), self.height()),
+                "normal": create_normal_texture(self.fb0, self.width(), self.height()),
+            }
+            glDrawBuffers(
+                2,
+                np.array([GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1], dtype="uint32"),
+            )
 
+            self._extra_textures["fb1"].delete()
+            self._extra_textures["fb2"].delete()
 
-            self._extra_textures['fb1'].delete()
-            self._extra_textures['fb2'].delete()
-
-            self._extra_textures = {'fb1': create_color_texture(self.fb1, self.width(), self.height()),
-                                    'fb2': create_color_texture(self.fb2, self.width(), self.height())}
+            self._extra_textures = {
+                "fb1": create_color_texture(self.fb1, self.width(), self.height()),
+                "fb2": create_color_texture(self.fb2, self.width(), self.height()),
+            }
 
             # The post-processing effect can have something to do as well
             for p in self.post_processing:
@@ -252,8 +258,8 @@ class QChemlabWidget(QGLWidget):
             r.draw()
 
     def wheelEvent(self, evt):
-        z = evt.delta()
-        self.camera.mouse_zoom(z*0.01)
+        z = evt.angleDelta()
+        self.camera.mouse_zoom(z.y() * 0.07)
 
         self.update()
 
@@ -265,13 +271,13 @@ class QChemlabWidget(QGLWidget):
         self._last_mouse_pos = evt.pos()
 
     def mouseReleaseEvent(self, evt):
-        if  time.time() - self._clickstart < 0.2:
+        if time.time() - self._clickstart < 0.2:
             self.clicked.emit(evt)
 
     def screen_to_normalized(self, x, y):
         w = self.width()
         h = self.height()
-        return  2*float(x)/w - 1.0, 1.0 - 2*float(y)/h
+        return 2 * float(x) / w - 1.0, 1.0 - 2 * float(y) / h
 
     def mouseMoveEvent(self, evt):
         if self._last_mouse_right:
@@ -285,13 +291,13 @@ class QChemlabWidget(QGLWidget):
                 w = self.width()
                 h = self.height()
 
-                x, y = 2*float(x)/w - 1.0, 1.0 - 2*float(y)/h
-                x2, y2 = 2*float(x2)/w - 1.0, 1.0 - 2*float(y2)/h
+                x, y = 2 * float(x) / w - 1.0, 1.0 - 2 * float(y) / h
+                x2, y2 = 2 * float(x2) / w - 1.0, 1.0 - 2 * float(y2) / h
                 dx, dy = x2 - x, y2 - y
 
                 cam = self.camera
 
-                cam.position += (-cam.a * dx  + -cam.b * dy) * 10
+                cam.position += (-cam.a * dx + -cam.b * dy) * 10
                 cam.pivot += (-cam.a * dx + -cam.b * dy) * 10
                 self.update()
 
@@ -306,8 +312,8 @@ class QChemlabWidget(QGLWidget):
                 w = self.width()
                 h = self.height()
 
-                x, y = 2*float(x)/w - 1.0, 1.0 - 2*float(y)/h
-                x2, y2 = 2*float(x2)/w - 1.0, 1.0 - 2*float(y2)/h
+                x, y = 2 * float(x) / w - 1.0, 1.0 - 2 * float(y) / h
+                x2, y2 = 2 * float(x2) / w - 1.0, 1.0 - 2 * float(y2) / h
                 dx, dy = x2 - x, y2 - y
 
                 cam = self.camera
@@ -316,7 +322,7 @@ class QChemlabWidget(QGLWidget):
                 self.update()
 
     def toimage(self, width=None, height=None):
-        '''Return the current scene as a PIL Image.
+        """Return the current scene as a PIL Image.
 
         **Example**
 
@@ -346,15 +352,16 @@ class QChemlabWidget(QGLWidget):
 
             https://pillow.readthedocs.org/en/latest/PIL.html#module-PIL.Image
 
-        '''
+        """
         from .postprocessing import NoEffect
+
         effect = NoEffect(self)
 
         self.post_processing.append(effect)
 
         oldwidth, oldheight = self.width(), self.height()
 
-        #self.initializeGL()
+        # self.initializeGL()
 
         if None not in (width, height):
             self.resize(width, height)
@@ -369,16 +376,18 @@ class QChemlabWidget(QGLWidget):
         coltex.bind()
         glActiveTexture(GL_TEXTURE0)
         data = glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE)
-        image = pil_Image.frombuffer('RGBA', (width, height), data, 'raw', 'RGBA', 0, -1)
+        image = pil_Image.frombuffer(
+            "RGBA", (width, height), data, "raw", "RGBA", 0, -1
+        )
 
-        #self.resize(oldwidth, oldheight)
-        #self.resizeGL(oldwidth, oldheight)
+        # self.resize(oldwidth, oldheight)
+        # self.resizeGL(oldwidth, oldheight)
 
         return image
 
+
 def create_color_texture(fb, width, height):
-    texture = Texture(GL_TEXTURE_2D, width, height, GL_RGBA, GL_RGBA,
-                      GL_UNSIGNED_BYTE)
+    texture = Texture(GL_TEXTURE_2D, width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
 
     # Set some parameters
     texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -387,36 +396,40 @@ def create_color_texture(fb, width, height):
     glBindFramebuffer(GL_FRAMEBUFFER, fb)
     glViewport(0, 0, width, height)
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           texture.id, 0)
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.id, 0
+    )
 
     return texture
 
+
 def create_depth_texture(fb, width, height):
-    texture = Texture(GL_TEXTURE_2D, width, height, GL_DEPTH_COMPONENT24,
-                      GL_DEPTH_COMPONENT, GL_FLOAT)
+    texture = Texture(
+        GL_TEXTURE_2D, width, height, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT
+    )
 
     texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     texture.set_parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     glBindFramebuffer(GL_FRAMEBUFFER, fb)
     glViewport(0, 0, width, height)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                           texture.id, 0)
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.id, 0
+    )
 
     return texture
 
 
 def create_normal_texture(fb, width, height):
-    texture = Texture(GL_TEXTURE_2D, width, height, GL_RGB, GL_RGB,
-                      GL_UNSIGNED_BYTE)
+    texture = Texture(GL_TEXTURE_2D, width, height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE)
 
     texture.set_parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     texture.set_parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     glBindFramebuffer(GL_FRAMEBUFFER, fb)
     glViewport(0, 0, width, height)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
-                           texture.id, 0)
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture.id, 0
+    )
 
     return texture
