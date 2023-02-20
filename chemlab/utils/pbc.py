@@ -1,6 +1,10 @@
 import numpy as np
 import dask.array as da
-from collections import Sequence
+
+try:
+    from collections import Sequence
+except:
+    from collections.abc import Sequence
 
 
 def minimum_image(coords, pbc):
@@ -32,43 +36,43 @@ def minimum_image(coords, pbc):
 
 
 def noperiodic(r_array, periodic, reference=None):
-    '''Rearrange the array of coordinates *r_array* in a way that doensn't
-       cross the periodic boundary.
+    """Rearrange the array of coordinates *r_array* in a way that doensn't
+    cross the periodic boundary.
 
-       Parameters
-       ----------
-       r_array : :class:`numpy.ndarray`, (Nx3)
-       Array of 3D coordinates.
+    Parameters
+    ----------
+    r_array : :class:`numpy.ndarray`, (Nx3)
+    Array of 3D coordinates.
 
-       periodic: :class:`numpy.ndarray`, (3)
-       Periodic boundary dimensions.
+    periodic: :class:`numpy.ndarray`, (3)
+    Periodic boundary dimensions.
 
-       reference: ``None`` or :class:`numpy.ndarray` (3)
-       The points will be moved to be in the periodic image centered on the reference. 
-       If None, the first point will be taken as a reference
+    reference: ``None`` or :class:`numpy.ndarray` (3)
+    The points will be moved to be in the periodic image centered on the reference.
+    If None, the first point will be taken as a reference
 
-       Returns
-       -------
+    Returns
+    -------
 
-       A (N, 3) array of coordinates, all in the same periodic image.
+    A (N, 3) array of coordinates, all in the same periodic image.
 
-       Example
-       -------
+    Example
+    -------
 
-           >>> coordinates = np.array([[0.1, 0.0, 0.0], [0.9, 0.0, 0.0]])
-           >>> periodic = np.array([1, 1, 1])
-           >>> noperiodic(coordinates, periodic)
-           [[ 0.1, 0.0, 0.0],
-            [-0.1, 0.0, 0.0]]
+        >>> coordinates = np.array([[0.1, 0.0, 0.0], [0.9, 0.0, 0.0]])
+        >>> periodic = np.array([1, 1, 1])
+        >>> noperiodic(coordinates, periodic)
+        [[ 0.1, 0.0, 0.0],
+         [-0.1, 0.0, 0.0]]
 
-    '''
+    """
     if reference is None:
         center = r_array[0]
     else:
         center = reference
 
     # Find the displacements
-    dr = (center - r_array)
+    dr = center - r_array
     drsign = np.sign(dr)
 
     # Move things when the displacement is more than half the box size
@@ -78,10 +82,10 @@ def noperiodic(r_array, periodic, reference=None):
 
 
 def subtract_vectors(a, b, periodic):
-    '''Returns the difference of the points vec_a - vec_b subject 
-       to the periodic boundary conditions.
+    """Returns the difference of the points vec_a - vec_b subject
+    to the periodic boundary conditions.
 
-    '''
+    """
     r = a - b
     delta = np.abs(r)
     sign = np.sign(r)
@@ -89,39 +93,38 @@ def subtract_vectors(a, b, periodic):
 
 
 def add_vectors(vec_a, vec_b, periodic):
-    '''Returns the sum of the points vec_a - vec_b subject 
-       to the periodic boundary conditions.
+    """Returns the sum of the points vec_a - vec_b subject
+    to the periodic boundary conditions.
 
-    '''
+    """
     moved = noperiodic(np.array([vec_a, vec_b]), periodic)
     return vec_a + vec_b
 
 
 def distance_matrix(a, b, periodic):
-    '''Calculate a distrance matrix between coordinates sets a and b
-    '''
+    """Calculate a distrance matrix between coordinates sets a and b"""
     a = a
     b = b[:, np.newaxis]
     return periodic_distance(a, b, periodic)
 
 
 def periodic_distance(a, b, periodic):
-    '''
+    """
     Periodic distance between two arrays. Periodic is a 3
     dimensional array containing the 3 box sizes.
 
-    '''
+    """
     a = np.array(a)
     b = np.array(b)
     periodic = np.array(periodic)
 
     delta = np.abs(a - b)
     delta = np.where(delta > 0.5 * periodic, periodic - delta, delta)
-    return np.sqrt((delta ** 2).sum(axis=-1))
+    return np.sqrt((delta**2).sum(axis=-1))
 
 
 def geometric_center(coords, periodic):
-    '''Geometric center taking into account periodic boundaries'''
+    """Geometric center taking into account periodic boundaries"""
     max_vals = periodic
     theta = 2 * np.pi * (coords / max_vals)
     eps = np.cos(theta) * max_vals / (2 * np.pi)
@@ -135,9 +138,7 @@ def geometric_center(coords, periodic):
 
 
 def radius_of_gyration(coords, periodic):
-    '''Calculate the square root of the mean distance squared from the center of gravity.
-
-    '''
+    """Calculate the square root of the mean distance squared from the center of gravity."""
     gc = geometric_center(coords, periodic)
     return (periodic_distance(coords, gc, periodic) ** 2).sum() / len(coords)
 

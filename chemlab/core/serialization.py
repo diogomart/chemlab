@@ -1,7 +1,8 @@
 from __future__ import division, print_function
 
 import json
-from collections import Iterable, OrderedDict, namedtuple
+from collections import OrderedDict, namedtuple
+from collections.abc import Iterable
 
 import numpy as np
 from six import string_types
