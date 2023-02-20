@@ -54,7 +54,7 @@ Follow these steps to quickly install the code and get started:
     $ cd chemlab
     $ python setup.py build_ext --inplace
 
-    $ export PYTHONPATH=$PYTHONPATH:/path/to/chemlab/chemlab
+    $ export PYTHONPATH=$PYTHONPATH:/path/to/chemlab/
 
     $ cd chemlab/playground
     $ python wata.py
