@@ -64,6 +64,8 @@ Important features missing
 - [ ] bond order representation
 - [ ] surfaces and volumes (e.g. isocontours)
 - [ ] labeling
+- [ ] drag selection
+- [ ] molecules manipulation
 
 
 
