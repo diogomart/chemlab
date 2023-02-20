@@ -59,6 +59,13 @@ Follow these steps to quickly install the code and get started:
     $ cd chemlab/playground
     $ python wata.py
 
+Important features missing
+--------------------------
+- [ ] bond order representation
+- [ ] surfaces and volumes (e.g. isocontours)
+- [ ] labeling
+
+
 
 Installation (old, not working)
 -------------------------------
