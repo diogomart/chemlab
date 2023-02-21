@@ -45,17 +45,27 @@ email or write an issue on the github page.
 
 Quick Installation
 ------------------
-Follow these steps to quickly install the code and get started:
+Optionally one can create a new environment such as with conda
+Tthen follow these steps to quickly install the code and get started:
 
+    # create a virtual environment 
+    $ conda create --name chem lab
+    $ conda activate chemlab
+
+    # clone the code
     $ git clone https://github.com/sforli/chemlab.git
 
+    # install dependencies 
     $ pip install pyqt5 cython pyopengl scipy dask h5py
 
+    #compile C/C++ libs
     $ cd chemlab
     $ python setup.py build_ext --inplace
 
+    # add the directory to the Python path
     $ export PYTHONPATH=$PYTHONPATH:/path/to/chemlab/
 
+    # try some code demo
     $ cd chemlab/playground
     $ python wata.py
 
@@ -69,19 +79,19 @@ Important features missing
 
 
 
-Installation (old, not working)
+Installation (old, not working anymore)
 -------------------------------
 
 TIP: more updated instructions are located in the docs:
      http://chemlab.readthedocs.org/en/latest/installation.html
 
-The easiest way to install chemlab is to use the Anaconda python distribution from the following link.
+~~The easiest way to install chemlab is to use the Anaconda python distribution from the following link.~~
 
-http://continuum.io/downloads
+~~http://continuum.io/downloads~~
 
-Then you can run the following command:
+~~Then you can run the following command:~~
 
-    conda install -c http://conda.binstar.org/gabrielelanaro chemlab
+~~    conda install -c http://conda.binstar.org/gabrielelanaro chemlab~~
 
 Documentation
 -------------
