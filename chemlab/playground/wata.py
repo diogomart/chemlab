@@ -83,7 +83,7 @@ v = QtViewer()
 
 
 effect = v.add_post_processing(SSAOEffect, 64, 2.0)
-# effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
+effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
 # effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0.5))
 effect = v.add_post_processing(FXAAEffect)
 effect = v.add_post_processing(GammaCorrectionEffect)
