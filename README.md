@@ -56,7 +56,7 @@ Tthen follow these steps to quickly install the code and get started:
     $ git clone https://github.com/sforli/chemlab.git
 
     # install dependencies 
-    $ pip install pyqt5 cython pyopengl scipy dask h5py
+    $ pip install pyqt5 cython pyopengl scipy dask h5py pillow six
 
     #compile C/C++ libs
     $ cd chemlab
