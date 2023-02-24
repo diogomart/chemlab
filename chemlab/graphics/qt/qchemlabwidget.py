@@ -162,13 +162,21 @@ class QChemlabWidget(QGLWidget):
     
     def is_post_processing_one(self):
         n = [p.enabled for p in self.post_processing]
-        n0 = np.nonzero(n)[0]
-        return [len(n0) > 1, n0[0]]
+        n0 = np.nonzero(n)[0]  
+        print(n,n0) 
+        return [len(n0) > 1, n0[0],n[-1]]
 
+    def get_post_processing(self):
+        pp = []
+        for p in self.post_processing:
+            if p.enabled :
+                pp.append(p)
+        return pp
+    
     def paintGL(self):
         """GL function called each time a frame is drawn"""
-
-        if self.post_processing and self.is_post_processing():
+        post_processing = self.get_post_processing()
+        if post_processing : # and self.is_post_processing():
             # Render to the first framebuffer
             glBindFramebuffer(GL_FRAMEBUFFER, self.fb0)
             glViewport(0, 0, self.width(), self.height())
@@ -204,14 +212,14 @@ class QChemlabWidget(QGLWidget):
         self.on_draw_world()
 
         # Iterate over all of the post processing effects
-        if self.post_processing and self.is_post_processing():
-            res = self.is_post_processing_one()
-            if res[0]:#len(self.post_processing) > 1:
+        if post_processing :#and self.is_post_processing():
+            # res = self.is_post_processing_one()
+            if len(post_processing) > 1:
                 newarg = self.textures.copy()
 
                 # Ping-pong framebuffer rendering
                 counter = 0
-                for i, pp in enumerate(self.post_processing[:-1]):
+                for i, pp in enumerate(post_processing[:-1]):
                     if not pp.enabled: continue
                     if counter % 2:
                         outfb = self.fb1
@@ -225,10 +233,10 @@ class QChemlabWidget(QGLWidget):
                     newarg["color"] = outtex
                     counter = counter + 1
 
-                self.post_processing[-1].render(DEFAULT_FRAMEBUFFER, newarg)
+                post_processing[-1].render(DEFAULT_FRAMEBUFFER, newarg)
 
             else:
-                self.post_processing[res[1]].render(DEFAULT_FRAMEBUFFER, self.textures)
+                post_processing[0].render(DEFAULT_FRAMEBUFFER, self.textures)
 
         # Draw the UI at the very last step
         self.on_draw_ui()
@@ -242,8 +250,8 @@ class QChemlabWidget(QGLWidget):
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
         self.camera.aspectratio = float(self.width()) / self.height()
-
-        if self.post_processing:
+        post_processing = self.get_post_processing()
+        if post_processing:
             # We have to recreate all of our textures
             self.textures["color"].delete()
             self.textures["depth"].delete()
@@ -268,7 +276,7 @@ class QChemlabWidget(QGLWidget):
             }
 
             # The post-processing effect can have something to do as well
-            for p in self.post_processing:
+            for p in post_processing:
                 p.on_resize(w, h)
 
     def on_draw_ui(self):
