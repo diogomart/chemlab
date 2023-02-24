@@ -49,7 +49,7 @@ class SSAOEffect(AbstractEffect):
     """
 
     
-    def __init__(self, widget, kernel_size=32, kernel_radius=2.0, ssao_power=2.0):
+    def __init__(self, widget, uConical=1, kernel_size=32, kernel_radius=2.0, ssao_power=2.0):
         self.widget = widget
         curdir = os.path.dirname(__file__)
 
@@ -92,16 +92,17 @@ class SSAOEffect(AbstractEffect):
         # Kernel sampling
         self.kernel_radius = kernel_radius
         self.kernel_size = kernel_size
+        self.uConical = uConical
         self.generate_kernel()
         
-    def set_options(self, ssao_power=None, kernel_size=None, kernel_radius=None):
+    def set_options(self, uConical=1, ssao_power=None, kernel_size=None, kernel_radius=None):
         if ssao_power:
             self.ssao_power = ssao_power
         if kernel_radius:
             self.kernel_radius = kernel_radius
         if kernel_size:
             self.kernel_size = kernel_size
-        
+        self.uConical = uConical
         self.generate_kernel()
         
     def generate_kernel(self):
@@ -196,7 +197,15 @@ class SSAOEffect(AbstractEffect):
         ssao_power_id = glGetUniformLocation(self.ssao_program,
                                                 b"ssao_power")
         glUniform1f(ssao_power_id, self.ssao_power)
-        
+
+        set_uniform(self.ssao_program,"uConical",'1i',self.uConical)
+        set_uniform(self.ssao_program,"usteps",'1i',32)
+        set_uniform(self.ssao_program,"urcone",'1f',0.001)
+        set_uniform(self.ssao_program,"upcone",'1f',0.0033)
+        set_uniform(self.ssao_program,"ushmax",'1f',0.99)
+        set_uniform(self.ssao_program,"uconeangle",'1f',0.001)
+        set_uniform(self.ssao_program,"uconescale",'1f',5.0)
+
         # Set resolution
         res_id = glGetUniformLocation(self.ssao_program, b"resolution")
         glUniform2f(res_id, self.widget.width(), self.widget.height())

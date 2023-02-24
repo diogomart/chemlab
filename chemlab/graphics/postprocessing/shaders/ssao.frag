@@ -17,7 +17,74 @@ uniform float ssao_power;
 uniform mat4 i_proj; // Inverse projection
 uniform mat4 proj; // projection
 
+//conical
+uniform int uConical;
+uniform int usteps;
+uniform float urcone;//1.0;
+uniform float upcone;//0.0023;
+uniform float ushmax;//0.2;
+uniform float uconeangle;//2.0;
+uniform float uconescale;//2.0;3
+
 const vec3 occlusionColor = vec3(0.0);
+
+
+bool isBackground(const in float depth) {
+    return depth == 1.0;
+}
+
+//bool outsideBounds(const in vec2 p) {
+//    return p.x < uBounds.x || p.y < uBounds.y || p.x > uBounds.z || p.y > uBounds.w;
+//}
+
+vec3 screenSpaceToViewSpace(const in vec3 ssPos, const in mat4 invProjection) {
+    vec4 p = vec4(ssPos * 2.0 - 1.0, 1.0);
+    p = invProjection * p;
+    return p.xyz / p.w;
+}
+
+float getDepth(const in vec2 coords) {
+    //if (outsideBounds(coords)) {
+    //    return 1.0;
+    //} else {
+        return texture2D(depth_texture, coords).r;
+    //}
+}
+
+float conicalShadow(in vec2 selfCoords){
+    vec2 invTexSize = 1.0 / resolution;
+    float selfDepth = getDepth( selfCoords );
+    //float selfDepthZ = getViewZ( selfDepth );
+    vec3 selfViewPos = screenSpaceToViewSpace(vec3(selfCoords, selfDepth), i_proj);
+    float rcone = urcone;//1.0;
+    float pcone = upcone;//0.0023;
+    float shmax = ushmax;//0.2;
+    float coneangle = uconeangle;//2.0;
+    float pconetot = 1.0;
+    float conemax = 10.0;
+    //50*50
+    for(int i = -usteps; i < usteps; i++){
+        for(int j = -usteps; j < usteps; j++){
+            vec2 off = vec2(float(i)*invTexSize.x, float(j)*invTexSize.y) * uconescale;
+            vec2 uv = selfCoords + off; //vec2(selfCoords.x+float(i)*invTexSize.x*uconescale,selfCoords.y+float(j)*invTexSize.y*uconescale);
+            float v = getDepth( uv );
+            vec3 vPos = screenSpaceToViewSpace(vec3(uv, v), i_proj);
+            //float viewZ = getViewZ(v);
+            float rzdiff = vPos.z - selfViewPos.z;
+            //float rzdiff = viewZ - selfDepthZ;
+            if (rzdiff > rcone){
+                float rtableij = sqrt((float(i)* float(i))+(float(j)*float(j)));
+                if (rtableij > conemax) rtableij = 10000.0;
+                if (rtableij == 0.0) rtableij = 10000.0;
+                if (rtableij * coneangle < rzdiff+rcone) {
+                    pconetot = pconetot - pcone;
+                }
+            }
+        }
+    }
+    float p = (1.0 - pconetot) * shmax;
+    return (1.0 - p);//max(pconetot, shmax); // 1.0 - (uBias * occlusion / float(dNSamples));
+}
 
 
 void main() {
@@ -68,36 +135,39 @@ void main() {
   float sample_depth;
   vec4 sample_depth_v;
   float occlusion = 0.0;
-  
-  for (int i=0; i < kernel_size; ++i){
-    // Sample position
-    sample = (tbn * random_kernel[i]) * kernel_radius;
-    sample = sample + pos.xyz;
-    
-    // Project sample position
-    offset = vec4(sample, 1.0);
-    offset = proj * offset; // In the range -w, w
-    offset /= offset.w; // in the range -1, 1
-    offset.xyz = offset.xyz * 0.5 + 0.5;
-    
-    // Sample depth
-    sample_depth_v = texture2D(depth_texture, offset.xy);
-    sample_depth = sample_depth_v.x;
-    
-    // We have to linearize it.. again
-    vec4 throwaway = vec4(offset.xy, sample_depth, 1.0); // range 0, 1
-    throwaway.xyz = throwaway.xyz * 2.0 - 1.0;
-    throwaway = i_proj * throwaway;
-    throwaway /= throwaway.w;
-    
-    if (throwaway.z >= sample.z) {
-      float rangeCheck= abs(pos.z - throwaway.z) < kernel_radius ? 1.0 : 0.0;
-      occlusion += 1.0 * rangeCheck; 
+  if (uConical==1) occlusion = conicalShadow(uv);
+  else {
+      for (int i=0; i < kernel_size; ++i){
+      // Sample position
+      sample = (tbn * random_kernel[i]) * kernel_radius;
+      sample = sample + pos.xyz;
+      
+      // Project sample position
+      offset = vec4(sample, 1.0);
+      offset = proj * offset; // In the range -w, w
+      offset /= offset.w; // in the range -1, 1
+      offset.xyz = offset.xyz * 0.5 + 0.5;
+      
+      // Sample depth
+      sample_depth_v = texture2D(depth_texture, offset.xy);
+      sample_depth = sample_depth_v.x;
+      
+      // We have to linearize it.. again
+      vec4 throwaway = vec4(offset.xy, sample_depth, 1.0); // range 0, 1
+      throwaway.xyz = throwaway.xyz * 2.0 - 1.0;
+      throwaway = i_proj * throwaway;
+      throwaway /= throwaway.w;
+      
+      if (throwaway.z >= sample.z) {
+        float rangeCheck= abs(pos.z - throwaway.z) < kernel_radius ? 1.0 : 0.0;
+        occlusion += 1.0 * rangeCheck; 
+      }
     }
+    vec3 occlusionColor = vec3(0.0);
+    occlusion = 1.0 - (occlusion / float(kernel_size));
+    occlusion = pow(occlusion, ssao_power);
   }
-  vec3 occlusionColor = vec3(0.0);
-  occlusion = 1.0 - (occlusion / float(kernel_size));
-  occlusion = pow(occlusion, ssao_power);
-  color.rgb = mix(occlusionColor, color.rgb, occlusion);
+  //
+  color.rgb = mix(occlusionColor, color.rgb, clamp(occlusion, 0.01, 0.99));
   gl_FragColor = color;//vec4(color.xyz, occlusion);
 }
