@@ -2,6 +2,7 @@
 
 from ..textures import Texture
 from ..shaders import set_uniform, compileShader
+from .base import AbstractEffect
 
 from OpenGL.GL import *
 from OpenGL.GL.framebufferobjects import *
@@ -11,7 +12,7 @@ import numpy as np
 import os
 
 
-class OutlineEffect(object):
+class OutlineEffect(AbstractEffect):
     """Add a colored, cartoon-like outline.
 
     This effect analyzes each point to be drawn and check if it's at a

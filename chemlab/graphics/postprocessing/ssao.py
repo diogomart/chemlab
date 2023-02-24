@@ -94,6 +94,10 @@ class SSAOEffect(AbstractEffect):
         self.kernel_size = kernel_size
         self.uConical = uConical
         self.generate_kernel()
+
+    def toggle_conical(self, avalue):
+        self.uConical = 1 if avalue else 0
+        self.widget.repaint()
         
     def set_options(self, uConical=1, ssao_power=None, kernel_size=None, kernel_radius=None):
         if ssao_power:

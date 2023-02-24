@@ -117,6 +117,7 @@ class FOGEffect(AbstractEffect):
         glUniform1i(qd_id, 0)
         glUniform1i(depth_id, 1)
 
+        print("fogDensity",self.fogDensity)
         # Set up the random kernel
         fogDensity_id = glGetUniformLocation(self.ssao_program, b"u_fogDensity")
         glUniform1f(fogDensity_id, self.fogDensity)

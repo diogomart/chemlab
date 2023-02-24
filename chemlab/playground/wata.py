@@ -38,7 +38,7 @@ from chemlab.graphics.uis import TextUI
 
 import chemlab.graphics.colors as colors
 
-from PyQt5.QtWidgets import QShortcut, QLabel, QSlider
+from PyQt5.QtWidgets import QShortcut, QLabel, QSlider, QCheckBox
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import pyqtSlot, Qt
 
@@ -93,30 +93,60 @@ v.widget.initializeGL()
 # v.shortcut.activated.connect(on_press)
 
 ssgi = v.add_post_processing(SSGIEffect)
+ssgi_b =  QCheckBox("ssgi")
+ssgi_b.setChecked(True)
+ssgi_b.stateChanged.connect(ssgi.toggle)
+v.gui_layout.addWidget(ssgi_b)
+
 
 ssao = v.add_post_processing(SSAOEffect, 1, 64, 2.0)
+ssao_b =  QCheckBox("ssao")
+ssao_b.setChecked(True)
+ssao_b.stateChanged.connect(ssao.toggle)
+v.gui_layout.addWidget(ssao_b)
+ssao_b1 =  QCheckBox("ssao conical")
+ssao_b1.setChecked(True)
+ssao_b1.stateChanged.connect(ssao.toggle_conical)
+v.gui_layout.addWidget(ssao_b1)
 
-#outline = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))  
+outline = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))  
+outline_b =  QCheckBox("outline")
+outline_b.setChecked(True)
+outline_b.stateChanged.connect(outline.toggle)
+v.gui_layout.addWidget(outline_b)
 
 # effect = v.add_post_processing(DOFEffect, 10,20,20)
 
-#effect = v.add_post_processing(FXAAEffect)
+fxaa = v.add_post_processing(FXAAEffect)
+fxaa_b =  QCheckBox("fxaa")
+fxaa_b.setChecked(True)
+fxaa_b.stateChanged.connect(fxaa.toggle)
+v.gui_layout.addWidget(fxaa_b)
 
-#fog = v.add_post_processing(FOGEffect, 0.01,[1,1,1,1],1)
+fog = v.add_post_processing(FOGEffect, 0.01,[1,1,1,1],1)
+fog_b =  QCheckBox("fog")
+fog_b.setChecked(True)
+fog_b.stateChanged.connect(fog.toggle)
+v.gui_layout.addWidget(fog_b)
 
 #effect = v.add_post_processing(GammaCorrectionEffect)
 
-sld = QSlider(Qt.Orientation.Horizontal, v.widget)
-sld.setRange(0.0, 100.0)
+sld = QSlider(Qt.Orientation.Horizontal)
+sld.setRange(0.0, 500.0)
 sld.setSingleStep(1.0)
+sld.setValue(fog.fogDensity*10000.0)
 def animate(newval):
+    #print(v.widget.width(),v.widget.height())
+    fog.set_options(fogDensity=newval/10000.0, fogMode=1)
+    # v.update()
+    v.widget.repaint()
     #print(fog,fog.fogDensity)
-    print(v.widget.width(),v.widget.height())
-    fog.set_options(fogDensity=newval/100.0)
-
+    
+    
 sld.valueChanged.connect(animate)
 #v.widget.uis.append(sld)
-
+v.gui_layout.addWidget(QLabel("fog density"))
+v.gui_layout.addWidget(sld)
 
 #effect = v.add_post_processing(DOFEffect, 10,20,20)
 # effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))

@@ -10,8 +10,9 @@ from OpenGL.arrays import vbo
 from ..transformations import normalized
 from ..shaders import set_uniform, compileShader
 from ..textures import Texture
+from .base import AbstractEffect
 
-class GlowEffect(object):
+class GlowEffect(AbstractEffect):
     """Enhance objects with a glowing effect.
 
     This effect can be used to illuminate objects like they were small

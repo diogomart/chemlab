@@ -73,6 +73,10 @@ class QtViewer(QMainWindow):
         # functions without having to show the window first...
         # context = QGLContext(QGLFormat(), None)
         self.controls = QDockWidget()
+        central_widget = QWidget()
+        self.gui_layout = QVBoxLayout()
+        central_widget.setLayout(self.gui_layout)
+
         title_widget = QWidget(self)
         self.controls.setTitleBarWidget(title_widget)
         #traj_controls = TrajectoryControls(self)
@@ -84,8 +88,9 @@ class QtViewer(QMainWindow):
         self.setCentralWidget(widget)
         self.resize(1000, 800)
         self.widget = widget
+        self.controls.setWidget(central_widget)
         self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
-
+        
         self.key_actions = {}
 
     def run(self):

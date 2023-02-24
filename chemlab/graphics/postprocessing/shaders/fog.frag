@@ -52,7 +52,8 @@ void main() {
     }
   else if (u_fog_mode == 1) 
     {
-        fogAmount = 1. - exp2(-u_fogDensity * u_fogDensity * fogDistance * fogDistance * LOG2);
+      float f = u_fogDensity;
+      fogAmount = 1. - exp2(-f * f * fogDistance * fogDistance * LOG2);
     }
 
   fogAmount = clamp(fogAmount, 0., 1.);

@@ -153,10 +153,22 @@ class QChemlabWidget(QGLWidget):
             "fb2": create_color_texture(self.fb2, self.width(), self.height()),
         }
 
+    def is_post_processing(self):
+        # need one effect
+        for p in self.post_processing:
+            if p.enabled :
+                return True
+        return False
+    
+    def is_post_processing_one(self):
+        n = [p.enabled for p in self.post_processing]
+        n0 = np.nonzero(n)[0]
+        return [len(n0) > 1, n0[0]]
+
     def paintGL(self):
         """GL function called each time a frame is drawn"""
 
-        if self.post_processing:
+        if self.post_processing and self.is_post_processing():
             # Render to the first framebuffer
             glBindFramebuffer(GL_FRAMEBUFFER, self.fb0)
             glViewport(0, 0, self.width(), self.height())
@@ -192,13 +204,16 @@ class QChemlabWidget(QGLWidget):
         self.on_draw_world()
 
         # Iterate over all of the post processing effects
-        if self.post_processing:
-            if len(self.post_processing) > 1:
+        if self.post_processing and self.is_post_processing():
+            res = self.is_post_processing_one()
+            if res[0]:#len(self.post_processing) > 1:
                 newarg = self.textures.copy()
 
                 # Ping-pong framebuffer rendering
+                counter = 0
                 for i, pp in enumerate(self.post_processing[:-1]):
-                    if i % 2:
+                    if not pp.enabled: continue
+                    if counter % 2:
                         outfb = self.fb1
                         outtex = self._extra_textures["fb1"]
                     else:
@@ -208,20 +223,21 @@ class QChemlabWidget(QGLWidget):
                     pp.render(outfb, newarg)
 
                     newarg["color"] = outtex
+                    counter = counter + 1
 
                 self.post_processing[-1].render(DEFAULT_FRAMEBUFFER, newarg)
 
             else:
-                self.post_processing[0].render(DEFAULT_FRAMEBUFFER, self.textures)
+                self.post_processing[res[1]].render(DEFAULT_FRAMEBUFFER, self.textures)
 
         # Draw the UI at the very last step
         self.on_draw_ui()
 
-    def width(self):
-        return super().width() * self.devicePixelRatio()
+    #def width(self):
+    #    return super().width() * self.devicePixelRatio()
 
-    def height(self):
-        return super().height() * self.devicePixelRatio()
+    #def height(self):
+    #    return super().height() * self.devicePixelRatio()
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)

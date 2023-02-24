@@ -96,7 +96,11 @@ class SSGIEffect(AbstractEffect):
         self.dLightCount=[]
         self.uAmbiantColor=[]
         self.uBounds = []
-        
+        self.enabled = True
+
+    def toggle(self, avalue):
+        self.enabled = avalue
+
     def getSample(self, nSamples):
         samples = [];
         for i in range(nSamples):
@@ -111,6 +115,8 @@ class SSGIEffect(AbstractEffect):
         pass
 
     def render(self, fb, textures):
+        if not self.enabled :
+            return
         # We need to render to the ssao framebuffer
         # Then we will blur the result
         w = self.widget.width()

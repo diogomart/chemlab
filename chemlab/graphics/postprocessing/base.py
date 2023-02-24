@@ -7,9 +7,16 @@ class AbstractEffect(object):
     approximate anti-aliasing, or screen space ambient occlusion.
 
     '''
+    enabled = True
+    widget = None
+
     def __init__(self, *args, **kwargs):
         pass
-    
+
+    def toggle(self, avalue):
+        self.enabled = avalue
+        self.widget.repaint()
+
     def set_options(self, **options):
         '''Subclasses should use this method to change the options of
         the effect
