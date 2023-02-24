@@ -84,7 +84,7 @@ class SSGIEffect(AbstractEffect):
             self.RandomHemisphereVector.append(v)
      
         self.uSamples = self.getSample(self.dNSamples)
-        self.uIndirectamount = 0.007
+        self.uIndirectamount = 0.001
         self.uNoiseamount = 150
         self.uNoise = True
         self.uBackground = True

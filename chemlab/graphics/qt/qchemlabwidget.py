@@ -217,6 +217,12 @@ class QChemlabWidget(QGLWidget):
         # Draw the UI at the very last step
         self.on_draw_ui()
 
+    def width(self):
+        return super().width() * self.devicePixelRatio()
+
+    def height(self):
+        return super().height() * self.devicePixelRatio()
+
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
         self.camera.aspectratio = float(self.width()) / self.height()

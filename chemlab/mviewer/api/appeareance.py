@@ -7,7 +7,7 @@ import numpy as np
 
 # Function to popup an interactive dialog
 def _interactive_color_dialog(callback):
-    from PyQt4.QtGui import QColorDialog
+    from PyQt5.QtGui import QColorDialog
     
     dialog = QColorDialog()
     

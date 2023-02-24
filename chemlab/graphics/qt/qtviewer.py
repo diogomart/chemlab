@@ -4,7 +4,7 @@ import time
 import sys
 
 # from PyQt5.QtGui import QMainWindow, QApplication
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtOpenGL import *
@@ -72,12 +72,19 @@ class QtViewer(QMainWindow):
         # Pre-initializing an OpenGL context can let us use opengl
         # functions without having to show the window first...
         # context = QGLContext(QGLFormat(), None)
+        self.controls = QDockWidget()
+        title_widget = QWidget(self)
+        self.controls.setTitleBarWidget(title_widget)
+        #traj_controls = TrajectoryControls(self)
+        #self.controls.setWidget(traj_controls)
+
         context = QGLContext(QGLFormat())
         widget = QChemlabWidget(context, self)
         context.makeCurrent()
         self.setCentralWidget(widget)
         self.resize(1000, 800)
         self.widget = widget
+        self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
 
         self.key_actions = {}
 

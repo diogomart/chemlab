@@ -4,9 +4,9 @@
 import numpy as np
 import os
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import Qt, QSize
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+from PyQt5.QtCore import Qt, QSize
+from PyQt5 import QtCore
 
 from ..graphics.qtviewer import QtViewer
 from ..graphics import colors
