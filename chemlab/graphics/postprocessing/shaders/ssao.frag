@@ -17,6 +17,9 @@ uniform float ssao_power;
 uniform mat4 i_proj; // Inverse projection
 uniform mat4 proj; // projection
 
+const vec3 occlusionColor = vec3(0.0);
+
+
 void main() {
   
   float u = gl_FragCoord.x/resolution.x;
@@ -92,9 +95,9 @@ void main() {
       occlusion += 1.0 * rangeCheck; 
     }
   }
-  
+  vec3 occlusionColor = vec3(0.0);
   occlusion = 1.0 - (occlusion / float(kernel_size));
   occlusion = pow(occlusion, ssao_power);
-
-  gl_FragColor = vec4(color.xyz, occlusion);
+  color.rgb = mix(occlusionColor, color.rgb, occlusion);
+  gl_FragColor = color;//vec4(color.xyz, occlusion);
 }

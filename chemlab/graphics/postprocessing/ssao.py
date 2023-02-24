@@ -207,7 +207,7 @@ class SSAOEffect(AbstractEffect):
         glBindFramebuffer(GL_FRAMEBUFFER, fb)
         glViewport(0, 0, self.widget.width(), self.widget.height()) # ??
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)        
-        
+        #print("size",self.widget.width(),self.widget.height())
         glUseProgram(self.blur_program)
         glActiveTexture(GL_TEXTURE0)
 
@@ -248,8 +248,9 @@ class SSAOEffect(AbstractEffect):
     def on_resize(self, w, h):
         # Make the ssao-containing framebuffer, we will have to blur
         # that
+        #print("resize",w,h)
         glBindFramebuffer(GL_FRAMEBUFFER, self.ssao_fb)
-        glViewport(0, 0, w, h)
+        glViewport(0, 0,self.widget.width(),self.widget.height())
 
         self.ssao_texture = Texture(GL_TEXTURE_2D, self.widget.width(),
                                self.widget.height(), GL_RGBA, GL_RGBA,

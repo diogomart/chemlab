@@ -120,7 +120,7 @@ class FOGEffect(AbstractEffect):
         # Set up the random kernel
         fogDensity_id = glGetUniformLocation(self.ssao_program, b"u_fogDensity")
         glUniform1f(fogDensity_id, self.fogDensity)
-        
+        self.fogColor = self.widget.background_color
         fogColor_id = glGetUniformLocation(self.ssao_program, b"u_fogColor")
         glUniform4f(fogColor_id, self.fogColor[0],self.fogColor[1],self.fogColor[2],self.fogColor[3])
 

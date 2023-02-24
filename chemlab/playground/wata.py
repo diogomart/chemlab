@@ -23,7 +23,10 @@ from chemlab.graphics.pickers import SpherePicker
 import numpy as np
 from chemlab.core.molecule import guess_bonds
 from chemlab.graphics.postprocessing import (
+    DOFEffect,
     SSAOEffect,
+    FOGEffect,
+    SSGIEffect,
     FXAAEffect,
     GlowEffect,
     GammaCorrectionEffect,
@@ -35,7 +38,7 @@ from chemlab.graphics.uis import TextUI
 
 import chemlab.graphics.colors as colors
 
-from PyQt5.QtWidgets import QShortcut, QLabel
+from PyQt5.QtWidgets import QShortcut, QLabel, QSlider
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import pyqtSlot, Qt
 
@@ -68,25 +71,58 @@ def mol_loader(fname, perceive_connectivity=True):
         bonds = guess_bonds(mol.r_array, mol.type_array, threshold=0.1, maxradius=0.2)
     return mol, bonds
 
-
+from chemlab.mviewer.qtmolecularviewer import QtMolecularViewer
+from chemlab.mviewer.representations import BallAndStickRepresentation
+    
 cdb = ChemlabDB()
 
 # @pyqtSlot
 # def on_press(evt):
 #     print(evt)
+#mol = cdb.get('molecule', 'example.norbornene')
+#mol.guess_bonds()
+#v = QtMolecularViewer()
 
+#v.run()
 
+#"""
 v = QtViewer()
 # v.shortcut = QShortcut(QKeySequence("Ctrl+O"), v)
 
 # v.shortcut.activated.connect(on_press)
 
 
-effect = v.add_post_processing(SSAOEffect, 64, 2.0)
-effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
-# effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0.5))
+ssgi = v.add_post_processing(SSGIEffect)
+
+ssao = v.add_post_processing(SSAOEffect, 64, 2.0)
+
+outline = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))  
+
+effect = v.add_post_processing(DOFEffect, 10,20,20)
+
 effect = v.add_post_processing(FXAAEffect)
+
+fog = v.add_post_processing(FOGEffect, 0.01,[1,1,1,1],1)
+
 effect = v.add_post_processing(GammaCorrectionEffect)
+
+sld = QSlider(Qt.Orientation.Horizontal, v.widget)
+sld.setRange(0.0, 100.0)
+sld.setSingleStep(1.0)
+def animate(newval):
+    #print(fog,fog.fogDensity)
+    print(v.widget.width(),v.widget.height())
+    fog.set_options(fogDensity=newval/100.0)
+
+sld.valueChanged.connect(animate)
+#v.widget.uis.append(sld)
+
+
+#effect = v.add_post_processing(DOFEffect, 10,20,20)
+# effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
+# effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0.5))
+#effect = v.add_post_processing(FXAAEffect)
+#effect = v.add_post_processing(GammaCorrectionEffect)
 
 wat = cdb.get("molecule", "example.water")
 # mol = cdb.get("molecule", "gromacs.spce")
@@ -193,3 +229,4 @@ v.picker = SpherePicker(v.widget, mol1.r_array, radii1)
 # df = datafile(sys.argv[1])
 # mol = df.read("system")
 v.run()
+#"""
