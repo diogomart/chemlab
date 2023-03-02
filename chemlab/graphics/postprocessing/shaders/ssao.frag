@@ -142,7 +142,7 @@ void main() {
     conical = conicalShadow(uv);
     occlusion = conical;
   }
-  if (uConical==0) {
+  if (uConical==0 || uCombine == 1) {
     for (int i=0; i < kernel_size; ++i){
       // Sample position
       sample = (tbn * random_kernel[i]) * kernel_radius;

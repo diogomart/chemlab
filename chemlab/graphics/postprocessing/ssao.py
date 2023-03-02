@@ -117,7 +117,7 @@ class SSAOEffect(AbstractEffect):
             "ushmax":{"type":"f","min":0.0,"max":1.0,"default":0.99},
             "uconeangle":{"type":"f","min":0.0,"max":1.0,"default":0.001},
             "uconescale":{"type":"f","min":0.0,"max":10.0,"default":3.0},
-            "uCombine":{"type":"b","min":0,"max":1,"default":1}
+            "uCombine":{"type":"b","min":0,"max":1,"default":0}
             
         }
         self.uis=[]
