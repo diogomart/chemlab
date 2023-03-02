@@ -340,12 +340,16 @@ class QtViewer(QMainWindow):
         scroll.setWidgetResizable(True)
         self.gui_layout = QtWidgets.QVBoxLayout(content)
 
+        gl_dock = QtWidgets.QDockWidget("3D View")
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, gl_dock)
         context = QGLContext(QGLFormat())
         widget = QChemlabWidget(context, self)
         widget.windows = self
         context.makeCurrent()
-        self.setCentralWidget(widget)
-
+        
+        gl_dock.setWidget(widget)
+        
+        # self.setCentralWidget(gl_dock)
         self.resize(1000, 800)
         self.widget = widget
         #self.controls.setWidget(central_widget)
