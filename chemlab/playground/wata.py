@@ -94,106 +94,39 @@ viewer.widget.initializeGL()
 # v.shortcut.activated.connect(on_press)
 
 fx_ssgi = viewer.add_post_processing(SSGIEffect)
-fx_ssgi_button = QCheckBox("ssgi")
-fx_ssgi_button.setChecked(True)
-fx_ssgi_button.stateChanged.connect(fx_ssgi.toggle)
-viewer.gui_layout.addWidget(fx_ssgi_button)
 
-
-fx_ssao = viewer.add_post_processing(SSAOEffect, 1, 64, 2.0)
-fx_ssao_button = QCheckBox("ssao")
-fx_ssao_button.setChecked(True)
-fx_ssao_button.stateChanged.connect(fx_ssao.toggle)
-fx_ssao_button.animateClick(30)
-viewer.gui_layout.addWidget(fx_ssao_button)
-
-fx_ssao_enable_conical_button = QCheckBox("ssao: conical mode")
-fx_ssao_enable_conical_button.setChecked(True)
-fx_ssao_enable_conical_button.stateChanged.connect(fx_ssao.toggle_conical)
-viewer.gui_layout.addWidget(fx_ssao_enable_conical_button)
+fx_ssao = viewer.add_post_processing(SSAOEffect, 1, 64, 2.0, 2.0)
 
 fx_outline = viewer.add_post_processing(
     OutlineEffect, "depthnormal"
 )  # , (0.5, 0.5, 0))
-fx_outline_button = QCheckBox("outline")
-fx_outline_button.setChecked(True)
-fx_outline_button.stateChanged.connect(fx_outline.toggle)
-viewer.gui_layout.addWidget(fx_outline_button)
 
 fx_dof = viewer.add_post_processing(DOFEffect, blurAmount=90, inFocus=20, PPM=20)
-fx_dof_button = QCheckBox("Depth of field")
-fx_dof_button.setChecked(True)
-fx_dof_button.stateChanged.connect(fx_dof_button.toggle)
-viewer.gui_layout.addWidget(fx_dof_button)
 
 fx_fxaa = viewer.add_post_processing(FXAAEffect)
-fx_fxaa_button = QCheckBox("fxaa")
-fx_fxaa_button.setChecked(True)
-fx_fxaa_button.stateChanged.connect(fx_fxaa.toggle)
-viewer.gui_layout.addWidget(fx_fxaa_button)
 
 fx_fog = viewer.add_post_processing(FOGEffect, 0.01, [1, 1, 1, 1], 1)
-fx_fog_button = QCheckBox("fog")
-fx_fog_button.setChecked(True)
-fx_fog_button.stateChanged.connect(fx_fog.toggle)
-viewer.gui_layout.addWidget(fx_fog_button)
 
 fx_gamma = viewer.add_post_processing(GammaCorrectionEffect)
 
-fx_fog_slider = QSlider(Qt.Orientation.Horizontal)
-fx_fog_slider.setRange(0, 5000)
-fx_fog_slider.setSingleStep(1)
-fx_fog_slider.setValue(int(fx_fog.fogDensity) * 10000)
+#fx_fog_slider = QSlider(Qt.Orientation.Horizontal)
+#fx_fog_slider.setRange(0, 5000)
+#fx_fog_slider.setSingleStep(1)
+#fx_fog_slider.setValue(int(fx_fog.fogDensity) * 10000)
+
+#def animate_fog(newval):
+#    # print(v.widget.width(),v.widget.height())
+#    fx_fog.set_options(fogDensity=newval / 10000.0, fogMode=1)
+#    # v.update()
+#    viewer.widget.repaint()
+#    # print(fog,fog.fogDensity)
 
 
-def animate_fog(newval):
-    # print(v.widget.width(),v.widget.height())
-    fx_fog.set_options(fogDensity=newval / 10000.0, fogMode=1)
-    # v.update()
-    viewer.widget.repaint()
-    # print(fog,fog.fogDensity)
-
-
-fx_fog_slider.valueChanged.connect(animate_fog)
+#fx_fog_slider.valueChanged.connect(animate_fog)
 # v.widget.uis.append(sld)
-viewer.gui_layout.addWidget(QLabel("fog density"))
-viewer.gui_layout.addWidget(fx_fog_slider)
+#viewer.gui_layout.addWidget(QLabel("fog density"))
+#viewer.gui_layout.addWidget(fx_fog_slider)
 # ------------------------------------------------------------------
-
-fx_dof_slider_focus = QSlider(Qt.Orientation.Horizontal)
-fx_dof_slider_focus.setRange(0, 1000)
-fx_dof_slider_focus.setSingleStep(1)
-fx_dof_slider_focus.setValue(fx_dof.inFocus)
-
-fx_dof_slider_ppm = QSlider(Qt.Orientation.Horizontal)
-fx_dof_slider_ppm.setRange(0, 1000)
-fx_dof_slider_ppm.setSingleStep(1)
-fx_dof_slider_ppm.setValue(fx_dof.PPM)
-
-
-def animate_dof_infocus(newval):
-    # print(v.widget.width(),v.widget.height())
-    value = newval / 100.0
-    print("DOF infocus", value)
-    fx_dof.set_options(inFocus=value, PPM=fx_dof_slider_ppm.value())
-    viewer.widget.repaint()
-
-
-def animate_dof_ppm(newval):
-    # print(v.widget.width(),v.widget.height())
-    value = newval / 100.0
-    print("DOF ppm", value)
-    fx_dof.set_options(PPM=value, inFocus=fx_dof_slider_focus.value())
-    viewer.widget.repaint()
-
-
-fx_dof_slider_focus.valueChanged.connect(animate_dof_infocus)
-viewer.gui_layout.addWidget(QLabel("DOF InFocus"))
-viewer.gui_layout.addWidget(fx_dof_slider_focus)
-
-fx_dof_slider_ppm.valueChanged.connect(animate_dof_ppm)
-viewer.gui_layout.addWidget(QLabel("DOF PPM"))
-viewer.gui_layout.addWidget(fx_dof_slider_ppm)
 
 # effect = v.add_post_processing(DOFEffect, 10,20,20)
 # effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
@@ -210,7 +143,7 @@ cov_radii = cdb.get("data", "covalentdict")
 
 # df = datafile("3zje.pdb")
 # df = datafile("tub.pdb")
-df = datafile("7eel.pdb")
+df = datafile("monster.pdb")
 mol1 = df.read("molecule")
 # bonds1 = mol1.bonds
 # bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)

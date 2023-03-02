@@ -50,6 +50,7 @@ class DOFEffect(AbstractEffect):
 
     
     def __init__(self, widget, blurAmount=1.0, inFocus=20.0, PPM=20.0):
+        self.name = "dof"
         self.widget = widget
         curdir = os.path.dirname(__file__)
 
@@ -76,7 +77,13 @@ class DOFEffect(AbstractEffect):
         self.blurAmount = blurAmount
         self.inFocus = inFocus
         self.PPM = PPM
-
+        self.uniforms={
+            "blurAmount":{"type":"f","min":0.0,"max":100.0,"default":90.0},
+            "inFocus":{"type":"f","min":0.0,"max":200.0,"default":20.0},
+            "PPM":{"type":"f","min":0.0,"max":200.0,"default":20.0},
+        }
+        self.uis=[]
+        self.setUniformSlider()
         
     def set_options(self, blurAmount=1.0, inFocus=20.0, PPM=20.0):
         self.blurAmount = blurAmount

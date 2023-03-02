@@ -1,3 +1,9 @@
+
+from PyQt5.QtWidgets import QShortcut, QLabel, QSlider, QCheckBox, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot, Qt
+
+from ..qt.qtviewer import CollapsibleBox
+
 class AbstractEffect(object):
     '''Interface for a generic post processing effect.
     
@@ -9,12 +15,59 @@ class AbstractEffect(object):
     '''
     enabled = True
     widget = None
+    uis = []
+    params_box = None
 
     def __init__(self, *args, **kwargs):
         pass
 
+
+    def store_var_f(self,akey,avalue):
+        setattr(self, akey, avalue/1000.0)
+        self.widget.repaint()
+
+    def store_var_i(self,akey,avalue):
+        setattr(self, akey, avalue)
+        self.widget.repaint()
+
+    def toggle_var(self,akey,avalue):
+        setattr(self, akey, 1 if avalue else 0)
+        self.widget.repaint()
+
+    def setUniformSlider(self):
+        self.params_box = CollapsibleBox(self.name+" options")
+        lay = QVBoxLayout()
+        for k in self.uniforms:
+            e = self.uniforms[k]
+            print(k,e)
+            if e["type"] == "f" :
+                lay.addWidget(QLabel(k))
+                _slider = QSlider(Qt.Orientation.Horizontal)
+                _slider.setRange(e["min"]*1000, e["max"]*1000)
+                _slider.setSingleStep(1)
+                _slider.setValue(e["default"]*1000)
+                _slider.valueChanged.connect(lambda val,x=k: self.store_var_f(x, val))
+                lay.addWidget(_slider)
+            if e["type"] == "i":
+                lay.addWidget(QLabel(k))
+                _slider = QSlider(Qt.Orientation.Horizontal)
+                _slider.setRange(int(e["min"]), int(e["max"]))
+                _slider.setSingleStep(1)
+                _slider.setValue(int(e["default"]))
+                _slider.valueChanged.connect(lambda val,x=k: self.store_var_i(x, val))
+                lay.addWidget(_slider)
+            if e["type"] == "b":
+                _button = QCheckBox(k)
+                _button.setChecked(True)
+                _button.stateChanged.connect(lambda val,x=k: self.toggle_var(x, val))
+                lay.addWidget(_button)
+        self.params_box.setContentLayout(lay)
+
     def toggle(self, avalue):
         self.enabled = avalue
+        if self.params_box is not None:
+            if avalue : self.params_box.show()
+            else : self.params_box.hide()
         self.widget.repaint()
 
     def set_options(self, **options):

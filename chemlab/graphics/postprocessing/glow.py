@@ -42,6 +42,7 @@ class GlowEffect(AbstractEffect):
     """
 
     def __init__(self, widget):
+        self.name = "glow"
         
         self.widget = widget
         curdir = os.path.dirname(__file__)

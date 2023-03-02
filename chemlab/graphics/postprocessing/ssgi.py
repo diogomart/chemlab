@@ -50,6 +50,7 @@ class SSGIEffect(AbstractEffect):
 
     
     def __init__(self, widget,):
+        self.name = "ssgi"
         self.widget = widget
         curdir = os.path.dirname(__file__)
 

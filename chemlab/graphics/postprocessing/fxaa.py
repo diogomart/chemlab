@@ -23,6 +23,7 @@ class FXAAEffect(AbstractEffect):
     
     '''
     def __init__(self, widget, span_max = 4.0, reduce_mul=1/8.0, reduce_min=1/128.0):
+        self.name = "fxaa"
         self.widget = widget
         curdir = os.path.dirname(__file__)
         

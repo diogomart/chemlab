@@ -18,6 +18,7 @@ uniform mat4 i_proj; // Inverse projection
 uniform mat4 proj; // projection
 
 //conical
+uniform int uCombine;
 uniform int uConical;
 uniform int usteps;
 uniform float urcone;//1.0;
@@ -135,9 +136,14 @@ void main() {
   float sample_depth;
   vec4 sample_depth_v;
   float occlusion = 0.0;
-  if (uConical==1) occlusion = conicalShadow(uv);
-  else {
-      for (int i=0; i < kernel_size; ++i){
+  float conical = 0.0;
+  float default_ao = 0.0;
+  if (uConical==1 || uCombine == 1) {
+    conical = conicalShadow(uv);
+    occlusion = conical;
+  }
+  if (uConical==0) {
+    for (int i=0; i < kernel_size; ++i){
       // Sample position
       sample = (tbn * random_kernel[i]) * kernel_radius;
       sample = sample + pos.xyz;
@@ -160,14 +166,19 @@ void main() {
       
       if (throwaway.z >= sample.z) {
         float rangeCheck= abs(pos.z - throwaway.z) < kernel_radius ? 1.0 : 0.0;
-        occlusion += 1.0 * rangeCheck; 
+        default_ao += 1.0 * rangeCheck; 
       }
     }
     vec3 occlusionColor = vec3(0.0);
-    occlusion = 1.0 - (occlusion / float(kernel_size));
-    occlusion = pow(occlusion, ssao_power);
+    default_ao = 1.0 - (default_ao / float(kernel_size));
+    default_ao = pow(default_ao, ssao_power);
+    occlusion=default_ao;
   }
   //
+  if (uCombine == 1)
+  {
+    occlusion = min(default_ao,conical);
+  }
   color.rgb = mix(occlusionColor, color.rgb, clamp(occlusion, 0.01, 0.99));
   gl_FragColor = color;//vec4(color.xyz, occlusion);
 }

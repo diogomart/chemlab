@@ -28,6 +28,7 @@ class GammaCorrectionEffect(AbstractEffect):
     '''
     
     def __init__(self, widget, gamma=2.2):
+        self.name = "gamma"
         self.widget = widget
         curdir = os.path.dirname(__file__)
         

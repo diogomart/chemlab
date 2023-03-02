@@ -36,6 +36,7 @@ class OutlineEffect(AbstractEffect):
     """
 
     def __init__(self, widget, kind="depthnormal", color=(0, 0, 0)):
+        self.name = "outline"
         self.widget = widget
         curdir = os.path.dirname(__file__)
         vert = open(os.path.join(curdir, "shaders", "noeffect.vert")).read()

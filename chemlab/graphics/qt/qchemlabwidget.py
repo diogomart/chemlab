@@ -179,8 +179,7 @@ class QChemlabWidget(QGLWidget):
         if post_processing : # and self.is_post_processing():
             # Render to the first framebuffer
             glBindFramebuffer(GL_FRAMEBUFFER, self.fb0)
-            glViewport(0, 0, self.width(), self.height())
-
+            # glViewport(0, 0, self.width(), self.height())
             status = glCheckFramebufferStatus(GL_FRAMEBUFFER)
             if status != GL_FRAMEBUFFER_COMPLETE:
                 reason = dict(
@@ -218,10 +217,9 @@ class QChemlabWidget(QGLWidget):
                 newarg = self.textures.copy()
 
                 # Ping-pong framebuffer rendering
-                counter = 0
                 for i, pp in enumerate(post_processing[:-1]):
-                    if not pp.enabled: continue
-                    if counter % 2:
+                    print(pp.name)
+                    if i % 2:
                         outfb = self.fb1
                         outtex = self._extra_textures["fb1"]
                     else:
@@ -231,21 +229,21 @@ class QChemlabWidget(QGLWidget):
                     pp.render(outfb, newarg)
 
                     newarg["color"] = outtex
-                    counter = counter + 1
-
+                print("last pp",post_processing[-1].name)
                 post_processing[-1].render(DEFAULT_FRAMEBUFFER, newarg)
 
             else:
+                print("one pp",post_processing[0].name)
                 post_processing[0].render(DEFAULT_FRAMEBUFFER, self.textures)
 
         # Draw the UI at the very last step
         self.on_draw_ui()
 
-    #def width(self):
-    #    return super().width() * self.devicePixelRatio()
+    def width(self):
+        return super().width() * self.devicePixelRatio()
 
-    #def height(self):
-    #    return super().height() * self.devicePixelRatio()
+    def height(self):
+        return super().height() * self.devicePixelRatio()
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)

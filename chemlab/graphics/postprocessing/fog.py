@@ -50,6 +50,7 @@ class FOGEffect(AbstractEffect):
 
     
     def __init__(self, widget, fogDensity=0.09, fogColor=[1,1,1,1], fogMode=0):
+        self.name = "fog"
         self.widget = widget
         curdir = os.path.dirname(__file__)
 
@@ -76,6 +77,11 @@ class FOGEffect(AbstractEffect):
         self.fogDensity = fogDensity
         self.fogColor = fogColor
         self.fogMode = fogMode
+        self.uniforms={
+            "fogDensity":{"type":"f","min":0.0,"max":0.01,"default":0.009},
+        }
+        self.uis=[]
+        self.setUniformSlider()
 
         
     def set_options(self, fogDensity=0.09, fogColor=[1,1,1,1], fogMode=0):

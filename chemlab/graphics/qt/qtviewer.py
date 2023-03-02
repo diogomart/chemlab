@@ -4,6 +4,7 @@ import time
 import sys
 
 # from PyQt5.QtGui import QMainWindow, QApplication
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtCore, QtGui
@@ -17,6 +18,81 @@ if app is None:
     app = QApplication(sys.argv)
     app_created = True
     app.references = set()
+
+
+class CollapsibleBox(QtWidgets.QWidget):
+    def __init__(self, title="", parent=None):
+        super(CollapsibleBox, self).__init__(parent)
+
+        self.toggle_button = QtWidgets.QToolButton(
+            text=title, checkable=True, checked=False
+        )
+        self.toggle_button.setStyleSheet("QToolButton { border: none; }")
+        self.toggle_button.setToolButtonStyle(
+            QtCore.Qt.ToolButtonTextBesideIcon
+        )
+        self.toggle_button.setArrowType(QtCore.Qt.RightArrow)
+        self.toggle_button.pressed.connect(self.on_pressed)
+
+        self.toggle_animation = QtCore.QParallelAnimationGroup(self)
+
+        self.content_area = QtWidgets.QScrollArea(
+            maximumHeight=0, minimumHeight=0
+        )
+        self.content_area.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
+        self.content_area.setFrameShape(QtWidgets.QFrame.NoFrame)
+
+        lay = QtWidgets.QVBoxLayout(self)
+        lay.setSpacing(0)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.toggle_button)
+        lay.addWidget(self.content_area)
+
+        self.toggle_animation.addAnimation(
+            QtCore.QPropertyAnimation(self, b"minimumHeight")
+        )
+        self.toggle_animation.addAnimation(
+            QtCore.QPropertyAnimation(self, b"maximumHeight")
+        )
+        self.toggle_animation.addAnimation(
+            QtCore.QPropertyAnimation(self.content_area, b"maximumHeight")
+        )
+
+    @QtCore.pyqtSlot()
+    def on_pressed(self):
+        checked = self.toggle_button.isChecked()
+        self.toggle_button.setArrowType(
+            QtCore.Qt.DownArrow if not checked else QtCore.Qt.RightArrow
+        )
+        self.toggle_animation.setDirection(
+            QtCore.QAbstractAnimation.Forward
+            if not checked
+            else QtCore.QAbstractAnimation.Backward
+        )
+        self.toggle_animation.start()
+
+    def setContentLayout(self, layout):
+        lay = self.content_area.layout()
+        del lay
+        self.content_area.setLayout(layout)
+        collapsed_height = (
+            self.sizeHint().height() - self.content_area.maximumHeight()
+        )
+        content_height = layout.sizeHint().height()
+        for i in range(self.toggle_animation.animationCount()):
+            animation = self.toggle_animation.animationAt(i)
+            animation.setDuration(500)
+            animation.setStartValue(collapsed_height)
+            animation.setEndValue(collapsed_height + content_height)
+
+        content_animation = self.toggle_animation.animationAt(
+            self.toggle_animation.animationCount() - 1
+        )
+        content_animation.setDuration(500)
+        content_animation.setStartValue(0)
+        content_animation.setEndValue(content_height)
 
 
 class FpsDraw(object):
@@ -72,13 +148,23 @@ class QtViewer(QMainWindow):
         # Pre-initializing an OpenGL context can let us use opengl
         # functions without having to show the window first...
         # context = QGLContext(QGLFormat(), None)
-        self.controls = QDockWidget()
-        central_widget = QWidget()
-        self.gui_layout = QVBoxLayout()
-        central_widget.setLayout(self.gui_layout)
 
-        title_widget = QWidget(self)
-        self.controls.setTitleBarWidget(title_widget)
+        dock = QtWidgets.QDockWidget("Params")
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
+        scroll = QtWidgets.QScrollArea()
+        dock.setWidget(scroll)
+        content = QtWidgets.QWidget()
+        scroll.setWidget(content)
+        scroll.setWidgetResizable(True)
+        self.gui_layout = QtWidgets.QVBoxLayout(content)
+        
+        #self.controls = QDockWidget()
+        #central_widget = QWidget()
+        #self.gui_layout = QVBoxLayout()
+        #central_widget.setLayout(self.gui_layout)
+
+        #title_widget = QWidget(self)
+        #self.controls.setTitleBarWidget(title_widget)
         #traj_controls = TrajectoryControls(self)
         #self.controls.setWidget(traj_controls)
 
@@ -86,10 +172,11 @@ class QtViewer(QMainWindow):
         widget = QChemlabWidget(context, self)
         context.makeCurrent()
         self.setCentralWidget(widget)
+
         self.resize(1000, 800)
         self.widget = widget
-        self.controls.setWidget(central_widget)
-        self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
+        #self.controls.setWidget(central_widget)
+        #self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
         
         self.key_actions = {}
 
@@ -226,6 +313,14 @@ class QtViewer(QMainWindow):
         """
         pp = klass(self.widget, *args, **kwargs)
         self.widget.post_processing.append(pp)
+        # add a checkbox
+        _button = QCheckBox(pp.name)
+        _button.setChecked(True)
+        _button.animateClick(30)
+        _button.stateChanged.connect(pp.toggle)
+        self.gui_layout.addWidget(_button)
+        if pp.params_box is not None :
+            self.gui_layout.addWidget(pp.params_box)
         return pp
 
     def remove_post_processing(self, pp):

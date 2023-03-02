@@ -4,6 +4,10 @@ from OpenGL.GL import *
 from OpenGL.GL.framebufferobjects import *
 from OpenGL.arrays import vbo
 
+from PyQt5.QtWidgets import QShortcut, QLabel, QSlider, QCheckBox, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot, Qt
+
+
 import numpy as np
 import numpy.linalg as LA
 import os
@@ -50,6 +54,8 @@ class SSAOEffect(AbstractEffect):
 
     
     def __init__(self, widget, uConical=1, kernel_size=32, kernel_radius=2.0, ssao_power=2.0):
+        self.name = "ssao"
+        
         self.widget = widget
         curdir = os.path.dirname(__file__)
 
@@ -93,13 +99,33 @@ class SSAOEffect(AbstractEffect):
         self.kernel_radius = kernel_radius
         self.kernel_size = kernel_size
         self.uConical = uConical
+        self.usteps=8
+        self.urcone=0.001
+        self.upcone=0.0033
+        self.ushmax=0.99
+        self.uconeangle = 0.001
+        self.uconescale = 5.0 
+        self.uCombine = 1
+        self.uniforms={
+            "ssao_power":{"type":"f","min":0.01,"max":10.0,"default":2.0},
+            "kernel_radius":{"type":"i","min":0.0,"max":32.0,"default":2.0},
+            "kernel_size":{"type":"i","min":1.0,"max":64.0,"default":2.0},
+            "uConical":{"type":"b","min":0,"max":1,"default":1},
+            "usteps":{"type":"i","min":0,"max":32,"default":8},
+            "urcone":{"type":"f","min":0.0000,"max":1.0,"default":0.001},
+            "upcone":{"type":"f","min":0.0000,"max":0.01,"default":0.0033},
+            "ushmax":{"type":"f","min":0.0,"max":1.0,"default":0.99},
+            "uconeangle":{"type":"f","min":0.0,"max":1.0,"default":0.001},
+            "uconescale":{"type":"f","min":0.0,"max":10.0,"default":3.0},
+            "uCombine":{"type":"b","min":0,"max":1,"default":1}
+            
+        }
+        self.uis=[]
+        self.setUniformSlider()
         self.generate_kernel()
 
-    def toggle_conical(self, avalue):
-        self.uConical = 1 if avalue else 0
-        self.widget.repaint()
-        
     def set_options(self, uConical=1, ssao_power=None, kernel_size=None, kernel_radius=None):
+        return
         if ssao_power:
             self.ssao_power = ssao_power
         if kernel_radius:
@@ -111,14 +137,15 @@ class SSAOEffect(AbstractEffect):
         
     def generate_kernel(self):
         self.kernel = []
-        for i in range(self.kernel_size):
+        print("generate_kernel",int(self.kernel_size))
+        for i in range(int(self.kernel_size)):
             randpoint = normalized([uniform(-1.0, 1.0),
                                     uniform(-1.0, 1.0),
                                     uniform(0.0, 1.0)])
             
             randpoint *= uniform(0.0, 1.0)
             # Accumulating points in the middle
-            scale = float(i)/self.kernel_size
+            scale = float(i)/int(self.kernel_size)
             scale = 0.1 + (1.0 - 0.1)*scale*scale # linear interpolation
             randpoint *= scale
             
@@ -147,7 +174,9 @@ class SSAOEffect(AbstractEffect):
     def render(self, fb, textures):
         # We need to render to the ssao framebuffer
         # Then we will blur the result
-        
+        #for k in self.uniforms:
+        #    print(k,getattr(self,k))
+        self.generate_kernel()
         glBindFramebuffer(GL_FRAMEBUFFER, self.ssao_fb)
         glViewport(0, 0, self.widget.width(), self.widget.height()) # ??
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -190,10 +219,10 @@ class SSAOEffect(AbstractEffect):
 
         # Set up the random kernel
         random_id = glGetUniformLocation(self.ssao_program, b"random_kernel")
-        glUniform3fv(random_id, self.kernel_size, self.kernel)
+        glUniform3fv(random_id, int(self.kernel_size), self.kernel)
         
         kernel_size_id = glGetUniformLocation(self.ssao_program, b"kernel_size")
-        glUniform1i(kernel_size_id, self.kernel_size)
+        glUniform1i(kernel_size_id, int(self.kernel_size))
         
         kernel_radius_id = glGetUniformLocation(self.ssao_program,
                                                 b"kernel_radius")
@@ -202,14 +231,15 @@ class SSAOEffect(AbstractEffect):
                                                 b"ssao_power")
         glUniform1f(ssao_power_id, self.ssao_power)
 
+        set_uniform(self.ssao_program,"uCombine",'1i',self.uCombine)
         set_uniform(self.ssao_program,"uConical",'1i',self.uConical)
-        set_uniform(self.ssao_program,"usteps",'1i',32)
-        set_uniform(self.ssao_program,"urcone",'1f',0.001)
-        set_uniform(self.ssao_program,"upcone",'1f',0.0033)
-        set_uniform(self.ssao_program,"ushmax",'1f',0.99)
-        set_uniform(self.ssao_program,"uconeangle",'1f',0.001)
-        set_uniform(self.ssao_program,"uconescale",'1f',5.0)
-
+        set_uniform(self.ssao_program,"usteps",'1i',self.usteps)
+        set_uniform(self.ssao_program,"urcone",'1f',self.urcone)
+        set_uniform(self.ssao_program,"upcone",'1f',self.upcone)
+        set_uniform(self.ssao_program,"ushmax",'1f',self.ushmax)
+        set_uniform(self.ssao_program,"uconeangle",'1f',self.uconeangle)
+        set_uniform(self.ssao_program,"uconescale",'1f',self.uconescale)
+        
         # Set resolution
         res_id = glGetUniformLocation(self.ssao_program, b"resolution")
         glUniform2f(res_id, self.widget.width(), self.widget.height())
