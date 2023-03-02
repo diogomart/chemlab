@@ -1,5 +1,5 @@
 from chemlab.mviewer.representations import BallAndStickRepresentation
-from chemlab.graphics.qttrajectory import format_time
+from chemlab.graphics.qt.qttrajectory import format_time
 
 from .core import *
 from chemlab.db import CirDB

@@ -47,7 +47,7 @@ class GlowEffect(AbstractEffect):
         self.widget = widget
         curdir = os.path.dirname(__file__)
 
-        # Setup SSAO program
+        # Setup program
         vert = open(os.path.join(curdir, 'shaders', 'noeffect.vert')).read()
         frag = open(os.path.join(curdir, 'shaders', 'glow1.frag')).read()        
         

@@ -331,7 +331,7 @@ class QtViewer(QMainWindow):
         # functions without having to show the window first...
         # context = QGLContext(QGLFormat(), None)
 
-        dock = QtWidgets.QDockWidget("Params")
+        dock = QtWidgets.QDockWidget("3D View Options")
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
         scroll = QtWidgets.QScrollArea()
         dock.setWidget(scroll)

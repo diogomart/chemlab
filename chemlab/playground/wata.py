@@ -72,7 +72,7 @@ def mol_loader(fname, perceive_connectivity=True):
     return mol, bonds
 
 
-# from chemlab.mviewer.qtmolecularviewer import QtMolecularViewer
+from chemlab.mviewer.qtmolecularviewer import QtMolecularViewer
 from chemlab.mviewer.representations import BallAndStickRepresentation
 
 cdb = ChemlabDB()
@@ -87,7 +87,7 @@ cdb = ChemlabDB()
 # v.run()
 
 # """
-viewer = QtViewer()
+viewer =QtMolecularViewer()# QtViewer()
 viewer.widget.initializeGL()
 # v.shortcut = QShortcut(QKeySequence("Ctrl+O"), v)
 
@@ -139,8 +139,8 @@ wat = cdb.get("molecule", "example.water")
 
 cov_radii = cdb.get("data", "covalentdict")
 
-df = datafile("3zje.pdb")
-# df = datafile("tub.pdb")
+# df = datafile("3zje.pdb")
+df = datafile("tub.pdb")
 # df = datafile("monster.pdb")
 mol1 = df.read("molecule")
 # bonds1 = mol1.bonds

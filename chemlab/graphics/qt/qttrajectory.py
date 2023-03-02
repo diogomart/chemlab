@@ -1,12 +1,5 @@
 # from PyQt5.QtGui import QMainWindow, QApplication, QDockWidget
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QApplication,
-    QDockWidget,
-    QPushButton,
-    QSlider,
-    QWidget,
-)
+from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt
 
@@ -120,24 +113,24 @@ class TrajectoryControls(QWidget):
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self.do_update)
 
-        containerhb2 = QtGui.QWidget(parent)
+        containerhb2 = QWidget(parent)
 
-        hb = QtGui.QHBoxLayout()  # For controls
-        vb = QtGui.QVBoxLayout()
+        hb = QHBoxLayout()  # For controls
+        vb = QVBoxLayout()
 
-        hb2 = QtGui.QHBoxLayout()  # For settings
+        hb2 = QHBoxLayout()  # For settings
 
         vb.addWidget(containerhb2)
         vb.addLayout(hb)
 
         containerhb2.setLayout(hb2)
-        containerhb2.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        containerhb2.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
-        hb2.addWidget(QtGui.QLabel("Speed"))
-        self._speed_slider = QtGui.QSlider(Qt.Horizontal)
+        hb2.addWidget(QLabel("Speed"))
+        self._speed_slider = QSlider(Qt.Horizontal)
         self._speed_slider.resize(100, self._speed_slider.height())
         self._speed_slider.setSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+            QSizePolicy.Fixed, QSizePolicy.Fixed
         )
 
         self.speeds = np.linspace(15, 250, 11).astype(int)
@@ -157,10 +150,10 @@ class TrajectoryControls(QWidget):
         hb.addWidget(self.slider, 2)
 
         self._label_tmp = "<b><FONT SIZE=30>{}</b>"
-        self.timelabel = QtGui.QLabel(self._label_tmp.format("0.0"))
+        self.timelabel = QLabel(self._label_tmp.format("0.0"))
         hb.addWidget(self.timelabel)
 
-        self._settings_button = QtGui.QPushButton()
+        self._settings_button = QPushButton()
         self._settings_button.setStyleSheet(
             """
                                  QPushButton {
@@ -175,7 +168,7 @@ class TrajectoryControls(QWidget):
         hb.addWidget(self._settings_button)
 
         self.play_stop.setFocus()
-        vb.setSizeConstraint(QtGui.QLayout.SetMaximumSize)
+        vb.setSizeConstraint(QLayout.SetMaximumSize)
         containerhb2.setVisible(False)
 
         self._settings_pan = containerhb2

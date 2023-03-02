@@ -1,14 +1,16 @@
 import atexit
 
 from PyQt5.QtCore import QTimer
-
-from IPython.kernel.zmq.kernelapp import IPKernelApp
-from IPython.lib.kernel import find_connection_file
-
-from IPython.qt.inprocess import QtInProcessKernelManager
-
-from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
-from IPython.config.application import catch_config_error
+from ipykernel.kernelapp import IPKernelApp
+from ipykernel.connect import _find_connection_file as find_connection_file
+from qtconsole.inprocess import QtInProcessKernelManager
+from qtconsole.rich_ipython_widget import RichIPythonWidget
+from IPython.core.application import catch_config_error
+#from IPython.kernel.zmq.kernelapp import IPKernelApp
+#from IPython.lib.kernel import find_connection_file
+#from IPython.qt.inprocess import QtInProcessKernelManager
+#from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
+#from IPython.config.application import catch_config_error
 
 from IPython.lib import guisupport
 
