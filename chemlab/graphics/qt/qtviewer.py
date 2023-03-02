@@ -19,11 +19,11 @@ if app is None:
     app_created = True
     app.references = set()
 
-
+# https://stackoverflow.com/questions/52615115/how-to-create-collapsible-box-in-pyqt
 class CollapsibleBox(QtWidgets.QWidget):
-    def __init__(self, title="", parent=None):
+    def __init__(self, title="", parent=None, cb=None):
         super(CollapsibleBox, self).__init__(parent)
-
+        self.cb = cb
         self.toggle_button = QtWidgets.QToolButton(
             text=title, checkable=True, checked=False
         )
@@ -72,6 +72,9 @@ class CollapsibleBox(QtWidgets.QWidget):
             else QtCore.QAbstractAnimation.Backward
         )
         self.toggle_animation.start()
+        if self.cb is not None :
+            self.cb(not checked)
+
 
     def setContentLayout(self, layout):
         lay = self.content_area.layout()
@@ -157,16 +160,6 @@ class QtViewer(QMainWindow):
         scroll.setWidget(content)
         scroll.setWidgetResizable(True)
         self.gui_layout = QtWidgets.QVBoxLayout(content)
-        
-        #self.controls = QDockWidget()
-        #central_widget = QWidget()
-        #self.gui_layout = QVBoxLayout()
-        #central_widget.setLayout(self.gui_layout)
-
-        #title_widget = QWidget(self)
-        #self.controls.setTitleBarWidget(title_widget)
-        #traj_controls = TrajectoryControls(self)
-        #self.controls.setWidget(traj_controls)
 
         context = QGLContext(QGLFormat())
         widget = QChemlabWidget(context, self)
@@ -314,6 +307,8 @@ class QtViewer(QMainWindow):
         pp = klass(self.widget, *args, **kwargs)
         self.widget.post_processing.append(pp)
         # add a checkbox
+        # self.gui_layout.addStretch(1)
+        # print("add checkbox",pp.name)
         _button = QCheckBox(pp.name)
         _button.setChecked(True)
         _button.animateClick(30)

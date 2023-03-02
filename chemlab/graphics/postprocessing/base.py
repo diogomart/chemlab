@@ -13,7 +13,7 @@ class AbstractEffect(object):
     approximate anti-aliasing, or screen space ambient occlusion.
 
     '''
-    enabled = True
+    enabled = False
     widget = None
     uis = []
     params_box = None
@@ -23,10 +23,12 @@ class AbstractEffect(object):
 
 
     def store_var_f(self,akey,avalue):
+        print(akey,avalue, avalue/1000.0)
         setattr(self, akey, avalue/1000.0)
         self.widget.repaint()
 
     def store_var_i(self,akey,avalue):
+        print(akey,avalue)
         setattr(self, akey, avalue)
         self.widget.repaint()
 
@@ -35,7 +37,7 @@ class AbstractEffect(object):
         self.widget.repaint()
 
     def setUniformSlider(self):
-        self.params_box = CollapsibleBox(self.name+" options")
+        self.params_box = CollapsibleBox(self.name+" options")#,cb=self.toggle)
         lay = QVBoxLayout()
         for k in self.uniforms:
             e = self.uniforms[k]
@@ -64,6 +66,7 @@ class AbstractEffect(object):
         self.params_box.setContentLayout(lay)
 
     def toggle(self, avalue):
+        print("toggle",self.name,avalue)
         self.enabled = avalue
         if self.params_box is not None:
             if avalue : self.params_box.show()

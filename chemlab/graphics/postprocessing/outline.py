@@ -50,8 +50,13 @@ class OutlineEffect(AbstractEffect):
                 "The kind of outline should be choosen between depthnormal, depthonly and normalonly"
             )
 
-        self.kind = kind
+        self.kind = {"depthnormal": 0, "depthonly": 1, "normalonly": 2}[kind]
         self.outline_color = np.array(color)
+        self.uniforms={
+            "kind":{"type":"i","min":0.0,"max":2.0,"default":0},
+        }
+        self.uis=[]
+        self.setUniformSlider()
         self.quad_program = shaders.compileProgram(vertex, fragment)
 
     def render(self, fb, texturedict):
@@ -65,7 +70,7 @@ class OutlineEffect(AbstractEffect):
             self.quad_program,
             "whichoutline",
             "1i",
-            {"depthnormal": 0, "depthonly": 1, "normalonly": 2}[self.kind],
+            self.kind,
         )
 
         inv_projection = np.linalg.inv(self.widget.camera.projection)

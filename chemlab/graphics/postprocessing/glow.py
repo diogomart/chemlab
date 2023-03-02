@@ -80,7 +80,11 @@ class GlowEffect(AbstractEffect):
         self.glow_fb, self.glow2_fb = glGenFramebuffers(2)
         
         self.radius = 1.0
-        
+        self.uniforms={
+            "radius":{"type":"f","min":0.0,"max":10.0,"default":self.radius},
+        }
+        self.uis=[]
+        self.setUniformSlider()
         # This will create the texture and setup the correct
         # resolution for the framebuffers
         self.on_resize(self.widget.width(), self.widget.height())

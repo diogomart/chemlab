@@ -111,12 +111,12 @@ class SSAOEffect(AbstractEffect):
             "kernel_radius":{"type":"i","min":0.0,"max":32.0,"default":2.0},
             "kernel_size":{"type":"i","min":1.0,"max":64.0,"default":2.0},
             "uConical":{"type":"b","min":0,"max":1,"default":1},
-            "usteps":{"type":"i","min":0,"max":32,"default":8},
-            "urcone":{"type":"f","min":0.0000,"max":1.0,"default":0.001},
+            "usteps":{"type":"i","min":0,"max":64,"default":8},
+            "urcone":{"type":"f","min":0.0000,"max":100.0,"default":0.001},
             "upcone":{"type":"f","min":0.0000,"max":0.01,"default":0.0033},
             "ushmax":{"type":"f","min":0.0,"max":1.0,"default":0.99},
-            "uconeangle":{"type":"f","min":0.0,"max":1.0,"default":0.001},
-            "uconescale":{"type":"f","min":0.0,"max":10.0,"default":3.0},
+            "uconeangle":{"type":"f","min":0.0,"max":3.0,"default":0.001},
+            "uconescale":{"type":"f","min":0.0,"max":100.0,"default":3.0},
             "uCombine":{"type":"b","min":0,"max":1,"default":0}
             
         }

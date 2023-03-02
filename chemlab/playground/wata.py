@@ -102,12 +102,10 @@ fx_outline = viewer.add_post_processing(
 )  # , (0.5, 0.5, 0))
 
 fx_dof = viewer.add_post_processing(DOFEffect, blurAmount=90, inFocus=20, PPM=20)
-
 fx_fxaa = viewer.add_post_processing(FXAAEffect)
-
 fx_fog = viewer.add_post_processing(FOGEffect, 0.01, [1, 1, 1, 1], 1)
-
 fx_gamma = viewer.add_post_processing(GammaCorrectionEffect)
+fx_glow =  viewer.add_post_processing(GlowEffect)
 
 #fx_fog_slider = QSlider(Qt.Orientation.Horizontal)
 #fx_fog_slider.setRange(0, 5000)
@@ -141,9 +139,9 @@ wat = cdb.get("molecule", "example.water")
 
 cov_radii = cdb.get("data", "covalentdict")
 
-# df = datafile("3zje.pdb")
+df = datafile("3zje.pdb")
 # df = datafile("tub.pdb")
-df = datafile("monster.pdb")
+# df = datafile("monster.pdb")
 mol1 = df.read("molecule")
 # bonds1 = mol1.bonds
 # bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)
@@ -157,8 +155,8 @@ bonds2 = mol2.bonds
 bonds2 = guess_bonds(mol2.r_array, mol2.type_array, threshold=0.1, maxradius=0.2)
 # # sphere renderer (protein)
 protein_color = colors.default_atom_map.copy()
-protein_color["C"] = colors.lawn_green
-protein_color = {"Xx": (0, 200, 255, 0)}
+#protein_color["C"] = colors.lawn_green
+#protein_color = {"Xx": (0, 200, 255, 0)}
 # protein_color["C"] = (0, 200, 255, 0)
 
 ligand_color = {"C": colors.forest_green}

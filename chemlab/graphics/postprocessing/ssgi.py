@@ -97,10 +97,17 @@ class SSGIEffect(AbstractEffect):
         self.dLightCount=[]
         self.uAmbiantColor=[]
         self.uBounds = []
-        self.enabled = True
-
-    def toggle(self, avalue):
-        self.enabled = avalue
+        self.uniforms={
+            "uIndirectamount":{"type":"f","min":0.0,"max":0.1,"default":0.001},
+            "uNoiseamount":{"type":"f","min":0.0,"max":300.0,"default":150.0},
+            "uNoise":{"type":"b","min":0,"max":1,"default":1},
+            "uBackground":{"type":"b","min":0,"max":1,"default":8},
+            "uGlobalLight":{"type":"b","min":0,"max":1,"default":0},
+            "uLightDistance":{"type":"f","min":0.0,"max":100.0,"default":0.0},
+            "uScale":{"type":"f","min":0.0,"max":100.0,"default":1.0},
+        }
+        self.uis=[]
+        self.setUniformSlider()
 
     def getSample(self, nSamples):
         samples = [];

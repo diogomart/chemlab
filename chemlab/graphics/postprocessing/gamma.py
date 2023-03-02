@@ -39,6 +39,11 @@ class GammaCorrectionEffect(AbstractEffect):
         vertex = compileShader(vert, GL_VERTEX_SHADER)
         fragment = compileShader(frag, GL_FRAGMENT_SHADER)
         self.gamma = gamma
+        self.uniforms={
+            "gamma":{"type":"f","min":0.0,"max":10.0,"default":gamma},
+        }
+        self.uis=[]
+        self.setUniformSlider()
         self.quad_program = shaders.compileProgram(vertex, fragment)
 
     def render(self, fb, textures):
