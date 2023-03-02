@@ -53,7 +53,7 @@ class OutlineEffect(AbstractEffect):
         self.kind = {"depthnormal": 0, "depthonly": 1, "normalonly": 2}[kind]
         self.outline_color = np.array(color)
         self.uniforms={
-            "kind":{"type":"i","min":0.0,"max":2.0,"default":0},
+            "kind":{"type":"i","min":0.0,"max":2.0,"default":0,"step":1.0},
         }
         self.uis=[]
         self.setUniformSlider()

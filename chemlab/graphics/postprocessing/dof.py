@@ -78,9 +78,9 @@ class DOFEffect(AbstractEffect):
         self.inFocus = inFocus
         self.PPM = PPM
         self.uniforms={
-            "blurAmount":{"type":"f","min":0.0,"max":100.0,"default":90.0},
-            "inFocus":{"type":"f","min":0.0,"max":200.0,"default":20.0},
-            "PPM":{"type":"f","min":0.0,"max":200.0,"default":20.0},
+            "blurAmount":{"type":"f","min":0.0,"max":100.0,"default":90.0,"step":1.0},
+            "inFocus":{"type":"f","min":0.0,"max":200.0,"default":20.0,"step":1.0},
+            "PPM":{"type":"f","min":0.0,"max":200.0,"default":20.0,"step":1.0},
         }
         self.uis=[]
         self.setUniformSlider()

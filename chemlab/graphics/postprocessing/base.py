@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QShortcut, QLabel, QSlider, QCheckBox, QVBoxLayout
 from PyQt5.QtCore import pyqtSlot, Qt
 
-from ..qt.qtviewer import CollapsibleBox
+from ..qt.qtviewer import CollapsibleBox, SlidersGroup
 
 class AbstractEffect(object):
     '''Interface for a generic post processing effect.
@@ -23,17 +23,20 @@ class AbstractEffect(object):
 
 
     def store_var_f(self,akey,avalue):
-        print(akey,avalue, avalue/1000.0)
-        setattr(self, akey, avalue/1000.0)
+        print(akey,avalue)
+        setattr(self, akey, avalue)
+        self.widget.windows.update()#repaint()
         self.widget.repaint()
 
     def store_var_i(self,akey,avalue):
         print(akey,avalue)
         setattr(self, akey, avalue)
+        self.widget.windows.update()#self.widget.repaint()
         self.widget.repaint()
 
     def toggle_var(self,akey,avalue):
         setattr(self, akey, 1 if avalue else 0)
+        self.widget.windows.update()#self.widget.repaint()
         self.widget.repaint()
 
     def setUniformSlider(self):
@@ -42,25 +45,26 @@ class AbstractEffect(object):
         for k in self.uniforms:
             e = self.uniforms[k]
             print(k,e)
-            if e["type"] == "f" :
+            if e["type"] == "f" or e["type"] == "i":
                 lay.addWidget(QLabel(k))
-                _slider = QSlider(Qt.Orientation.Horizontal)
-                _slider.setRange(e["min"]*1000, e["max"]*1000)
-                _slider.setSingleStep(1)
-                _slider.setValue(e["default"]*1000)
-                _slider.valueChanged.connect(lambda val,x=k: self.store_var_f(x, val))
-                lay.addWidget(_slider)
-            if e["type"] == "i":
-                lay.addWidget(QLabel(k))
-                _slider = QSlider(Qt.Orientation.Horizontal)
-                _slider.setRange(int(e["min"]), int(e["max"]))
-                _slider.setSingleStep(1)
-                _slider.setValue(int(e["default"]))
+                stype = "float"
+                if e["type"] == "i" :
+                    stype = "int"
+                _slider = SlidersGroup(Qt.Orientation.Horizontal, "Horizontal",stype=stype,
+                                                min=e["min"],max=e["max"],step=e["step"])
+                _slider.setValue(e["default"])
                 _slider.valueChanged.connect(lambda val,x=k: self.store_var_i(x, val))
+                _slider.fvalueChanged.connect(lambda val,x=k: self.store_var_f(x, val))
+                #lay.addWidget(QLabel(k))
+                #_slider = QSlider(Qt.Orientation.Horizontal)
+                #_slider.setRange(e["min"]*1000, e["max"]*1000)
+                #_slider.setSingleStep(1)
+                #_slider.setValue(e["default"]*1000)
+                #_slider.valueChanged.connect(lambda val,x=k: self.store_var_f(x, val))
                 lay.addWidget(_slider)
             if e["type"] == "b":
                 _button = QCheckBox(k)
-                _button.setChecked(True)
+                _button.setChecked(True if e["default"] == 1 else False)
                 _button.stateChanged.connect(lambda val,x=k: self.toggle_var(x, val))
                 lay.addWidget(_button)
         self.params_box.setContentLayout(lay)

@@ -40,7 +40,7 @@ class GammaCorrectionEffect(AbstractEffect):
         fragment = compileShader(frag, GL_FRAGMENT_SHADER)
         self.gamma = gamma
         self.uniforms={
-            "gamma":{"type":"f","min":0.0,"max":10.0,"default":gamma},
+            "gamma":{"type":"f","min":0.0,"max":10.0,"default":gamma,"step":1.0},
         }
         self.uis=[]
         self.setUniformSlider()

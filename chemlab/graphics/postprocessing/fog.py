@@ -78,7 +78,7 @@ class FOGEffect(AbstractEffect):
         self.fogColor = fogColor
         self.fogMode = fogMode
         self.uniforms={
-            "fogDensity":{"type":"f","min":0.0,"max":0.01,"default":0.009},
+            "fogDensity":{"type":"f","min":0.0,"max":0.1,"default":0.009,"step":0.001},
         }
         self.uis=[]
         self.setUniformSlider()

@@ -107,16 +107,16 @@ class SSAOEffect(AbstractEffect):
         self.uconescale = 5.0 
         self.uCombine = 1
         self.uniforms={
-            "ssao_power":{"type":"f","min":0.01,"max":10.0,"default":2.0},
-            "kernel_radius":{"type":"i","min":0.0,"max":32.0,"default":2.0},
-            "kernel_size":{"type":"i","min":1.0,"max":64.0,"default":2.0},
+            "ssao_power":{"type":"f","min":0.01,"max":10.0,"default":2.0,"step":0.01},
+            "kernel_radius":{"type":"i","min":0.0,"max":32.0,"default":2.0,"step":1.0},
+            "kernel_size":{"type":"i","min":1.0,"max":64.0,"default":2.0,"step":1.0},
             "uConical":{"type":"b","min":0,"max":1,"default":1},
-            "usteps":{"type":"i","min":0,"max":64,"default":8},
-            "urcone":{"type":"f","min":0.0000,"max":100.0,"default":0.001},
-            "upcone":{"type":"f","min":0.0000,"max":0.01,"default":0.0033},
-            "ushmax":{"type":"f","min":0.0,"max":1.0,"default":0.99},
-            "uconeangle":{"type":"f","min":0.0,"max":3.0,"default":0.001},
-            "uconescale":{"type":"f","min":0.0,"max":100.0,"default":3.0},
+            "usteps":{"type":"i","min":0,"max":64,"default":8,"step":1},
+            "urcone":{"type":"f","min":0.0000,"max":100.0,"default":0.001,"step":0.001},
+            "upcone":{"type":"f","min":0.0000,"max":1.0,"default":0.0033,"step":0.0001},
+            "ushmax":{"type":"f","min":0.0,"max":1.0,"default":0.99,"step":0.01},
+            "uconeangle":{"type":"f","min":0.0,"max":3.0,"default":0.001,"step":0.001},
+            "uconescale":{"type":"f","min":0.0,"max":100.0,"default":3.0,"step":1.0},
             "uCombine":{"type":"b","min":0,"max":1,"default":0}
             
         }

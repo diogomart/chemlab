@@ -8,6 +8,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtCore, QtGui
+from PyQt5.QtGui import QPainter, QColor, QPen
 from PyQt5.QtOpenGL import *
 
 from .qchemlabwidget import QChemlabWidget
@@ -18,6 +19,184 @@ if app is None:
     app = QApplication(sys.argv)
     app_created = True
     app.references = set()
+
+class SlidersGroup(QWidget):
+
+    valueChanged = QtCore.pyqtSignal(int)
+    fvalueChanged = QtCore.pyqtSignal(float)
+
+    def __init__(self, orientation, title, stype="int", parent=None,min=0,max=10,step=1):
+        super(SlidersGroup, self).__init__( parent)
+
+        self.stype = stype
+        self.min=min
+        self.max=max
+        self.step=step
+        
+        self.slider = QSlider(orientation)
+        self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
+        #self.slider.setTickPosition(QSlider.TicksBothSides)
+        #self.slider.setTickInterval(10)
+        #self.slider.setSingleStep(1)
+
+        if self.stype == "float":
+            self.valueSpinBox = QDoubleSpinBox()
+            self.valueSpinBox.setDecimals(4)
+        else :
+            self.valueSpinBox = QSpinBox()
+        #self.valueSpinBox.setRange(-100, 100)
+        #self.valueSpinBox.setSingleStep(1)
+        #self.valueSpinBox.setValue = self.spinerSetValue
+        #self.horizontalSliders.valueChanged.connect(self.verticalSliders.setValue)
+        #self.verticalSliders.valueChanged.connect(self.valueSpinBox.setValue)
+
+        #self.valueSpinBox.valueChanged.connect(self.slider.setValue)
+
+        #self.scrollBar = QScrollBar(orientation)
+        #self.scrollBar.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        #self.dial = QDial()
+        #self.dial.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        #self.slider.valueChanged.connect(self.valueSpinBox.setValue)
+        self.slider.valueChanged.connect(self.spinerSetValue)
+        self.valueSpinBox.valueChanged.connect(self.sliderSetValue)
+        #self.valueSpinBox.editingFinished.connect(self.sliderSetValue)
+        #self.connect(self.valueSpinBox, QtCore.SIGNAL('valueChanged'), self.sliderSetValue)
+        
+        #self.scrollBar.valueChanged.connect(self.dial.setValue)
+        #self.dial.valueChanged.connect(self.slider.setValue)
+        #self.dial.valueChanged.connect(self.valueChanged)
+
+        slidersLayout = QHBoxLayout()
+        slidersLayout.addWidget(self.valueSpinBox)
+        slidersLayout.addWidget(self.slider)
+        #slidersLayout.addWidget(self.scrollBar)
+        #slidersLayout.addWidget(self.dial)
+        self.setLayout(slidersLayout)    
+        self.setRange(self.min,self.max)
+        self.setSingleStep(self.step)
+
+    def sliderSetValue(self,*args):
+        #print "sliderSetValue",self,args
+        value = self.valueSpinBox.value()
+        if self.stype == "float":
+            value = int(value*(1./self.step))
+        self.slider.setValue(value)
+
+    def spinerSetValue(self,value):
+        #print "spinerSetValue",value
+        if self.stype == "float":
+            value = float(value*float(self.step))
+        self.valueSpinBox.setValue(value)
+        if self.stype == "float":
+            signal = 'valueChanged(double)'
+            self.fvalueChanged.emit(value)
+        elif self.stype == "int":
+            signal = 'valueChanged(int)'       
+            self.valueChanged.emit(value)
+        
+    def setValue(self, value):
+        self.sliderSetValue(value)
+        self.valueSpinBox.setValue(value)
+        if self.stype == "float":
+            signal = 'valueChanged(double)'
+            self.fvalueChanged.emit(value)
+        elif self.stype == "int":
+            signal = 'valueChanged(int)'       
+            self.valueChanged.emit( value)
+        
+    def setRange(self, valuemin,valuemax):
+        if self.stype == "float":
+            valuemin = valuemin * (1.0/self.step)
+            valuemax = valuemax * (1.0/self.step)
+        self.slider.setRange(valuemin,valuemax)
+        self.valueSpinBox.setRange(valuemin,valuemax)
+        #self.scrollBar.setMinimum(value)
+        #self.dial.setMinimum(value)
+        
+    def setMinimum(self, value):    
+        self.slider.setMinimum(value)
+        self.valueSpinBox.setMinimum(value)
+        #self.scrollBar.setMinimum(value)
+        #self.dial.setMinimum(value)    
+
+    def setMaximum(self, value):    
+        self.slider.setMaximum(value)
+        self.valueSpinBox.setMaximum(value)
+        #self.scrollBar.setMaximum(value)
+        #self.dial.setMaximum(value)    
+        
+    def invertAppearance(self, invert):
+        self.slider.setInvertedAppearance(invert)
+        #self.scrollBar.setInvertedAppearance(invert)
+        #self.dial.setInvertedAppearance(invert)    
+
+    def setSingleStep(self,step):
+        self.valueSpinBox.setSingleStep(step)
+        if self.stype == "float":
+            step = step * (1.0/self.step)
+        self.slider.setSingleStep(step)
+        
+    def value(self):
+        v = self.slider.value()
+        if self.stype == "float":
+            return float(v)*self.step
+        else :
+            return int(v)
+        
+    def invertKeyBindings(self, invert):
+        self.slider.setInvertedControls(invert)
+        #self.scrollBar.setInvertedControls(invert)
+        #self.dial.setInvertedControls(invert)
+
+    #def valueChanged(self,value):
+    #    print "valueChanged",value
+    #    print self.slider.value()
+    #   print self.valueSpinBox.value()
+    
+class ColorButton(QPushButton):
+
+    StyleSheet = 'background-color: %s;'
+    colorChanged = QtCore.pyqtSignal(QColor)
+
+    def __init__(self, parent=None, color=None, toolTip='',callback=None):
+            QPushButton.__init__(self, parent)
+            self._color = QColor() if color is None else color
+            #NOTE: tool tips derrive style sheets from our button, so we can not really use it here
+            self._toolTip = toolTip
+            self.clicked.connect(self.onButtonClicked)
+            self._cb = callback
+
+    def getColor(self):
+        return self._color
+
+    def setColor(self, color):
+        self._color = color
+        if color.isValid():
+            self.setStyleSheet(self.StyleSheet % color.name() )
+        else:
+            self.setStyleSheet('')
+        self.colorChanged.emit(color)
+
+    def resetColor(self):
+        self.setColor(QColor() )
+
+    def toolTip(self):
+        return self._toolTip
+
+    def setToolTip(self, text):
+        self._toolTip = text
+
+    def onButtonClicked(self):
+        #NOTE: the dialog derrives its style sheet from the button, so we have to
+        # use our parent as parent for the dialog
+        color = QColorDialog.getColor(self.getColor(), self.parent(), self.toolTip() )
+        if color.isValid():
+            self.setColor(color)
+            if self._cb is not None :
+                self._cb(color)
+                    
 
 # https://stackoverflow.com/questions/52615115/how-to-create-collapsible-box-in-pyqt
 class CollapsibleBox(QtWidgets.QWidget):
@@ -163,6 +342,7 @@ class QtViewer(QMainWindow):
 
         context = QGLContext(QGLFormat())
         widget = QChemlabWidget(context, self)
+        widget.windows = self
         context.makeCurrent()
         self.setCentralWidget(widget)
 

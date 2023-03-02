@@ -105,7 +105,7 @@ class QChemlabWidget(QGLWidget):
 
     def __init__(self, *args, **kwargs):
         super(QChemlabWidget, self).__init__(*args, **kwargs)
-
+        self.windows = None
         # Renderers are responsible for actually drawing stuff
         self.renderers = []
 

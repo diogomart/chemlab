@@ -81,7 +81,7 @@ class GlowEffect(AbstractEffect):
         
         self.radius = 1.0
         self.uniforms={
-            "radius":{"type":"f","min":0.0,"max":10.0,"default":self.radius},
+            "radius":{"type":"f","min":0.0,"max":10.0,"default":self.radius,"step":1.0},
         }
         self.uis=[]
         self.setUniformSlider()
