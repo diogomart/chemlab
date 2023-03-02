@@ -44,8 +44,8 @@ from PyQt5.QtCore import pyqtSlot, Qt
 
 
 def on_click(evt):
-    x, y = v.widget.screen_to_normalized(evt.x(), evt.y())
-    indices, screen_cord = found = v.picker.pick(x, y)
+    x, y = viewer.widget.screen_to_normalized(evt.x(), evt.y())
+    indices, screen_cord = found = viewer.picker.pick(x, y)
     if len(indices) == 0:
         return
 
@@ -57,8 +57,8 @@ def on_click(evt):
         [0.2] * len(indices)
     )  # [self.renderer.radii[i]+0.01 for i in indices]
     print("POS< RADII", pos, radii)
-    v.add_renderer(SphereImpostorRenderer, pos, radii, cols, transparent=True)
-    v.widget.update()
+    viewer.add_renderer(SphereImpostorRenderer, pos, radii, cols, transparent=True)
+    viewer.widget.update()
     print("UPDATED")
 
     # self.viewer.widget.update()
@@ -71,88 +71,135 @@ def mol_loader(fname, perceive_connectivity=True):
         bonds = guess_bonds(mol.r_array, mol.type_array, threshold=0.1, maxradius=0.2)
     return mol, bonds
 
+
 # from chemlab.mviewer.qtmolecularviewer import QtMolecularViewer
 from chemlab.mviewer.representations import BallAndStickRepresentation
-    
+
 cdb = ChemlabDB()
 
 # @pyqtSlot
 # def on_press(evt):
 #     print(evt)
-#mol = cdb.get('molecule', 'example.norbornene')
-#mol.guess_bonds()
-#v = QtMolecularViewer()
+# mol = cdb.get('molecule', 'example.norbornene')
+# mol.guess_bonds()
+# v = QtMolecularViewer()
 
-#v.run()
+# v.run()
 
-#"""
-v = QtViewer()
-v.widget.initializeGL()
+# """
+viewer = QtViewer()
+viewer.widget.initializeGL()
 # v.shortcut = QShortcut(QKeySequence("Ctrl+O"), v)
 
 # v.shortcut.activated.connect(on_press)
 
-ssgi = v.add_post_processing(SSGIEffect)
-ssgi_b =  QCheckBox("ssgi")
-ssgi_b.setChecked(True)
-ssgi_b.stateChanged.connect(ssgi.toggle)
-v.gui_layout.addWidget(ssgi_b)
+fx_ssgi = viewer.add_post_processing(SSGIEffect)
+fx_ssgi_button = QCheckBox("ssgi")
+fx_ssgi_button.setChecked(True)
+fx_ssgi_button.stateChanged.connect(fx_ssgi.toggle)
+viewer.gui_layout.addWidget(fx_ssgi_button)
 
 
-ssao = v.add_post_processing(SSAOEffect, 1, 64, 2.0)
-ssao_b =  QCheckBox("ssao")
-ssao_b.setChecked(True)
-ssao_b.stateChanged.connect(ssao.toggle)
-v.gui_layout.addWidget(ssao_b)
-ssao_b1 =  QCheckBox("ssao conical")
-ssao_b1.setChecked(True)
-ssao_b1.stateChanged.connect(ssao.toggle_conical)
-v.gui_layout.addWidget(ssao_b1)
+fx_ssao = viewer.add_post_processing(SSAOEffect, 1, 64, 2.0)
+fx_ssao_button = QCheckBox("ssao")
+fx_ssao_button.setChecked(True)
+fx_ssao_button.stateChanged.connect(fx_ssao.toggle)
+fx_ssao_button.animateClick(30)
+viewer.gui_layout.addWidget(fx_ssao_button)
 
-outline = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))  
-outline_b =  QCheckBox("outline")
-outline_b.setChecked(True)
-outline_b.stateChanged.connect(outline.toggle)
-v.gui_layout.addWidget(outline_b)
+fx_ssao_enable_conical_button = QCheckBox("ssao: conical mode")
+fx_ssao_enable_conical_button.setChecked(True)
+fx_ssao_enable_conical_button.stateChanged.connect(fx_ssao.toggle_conical)
+viewer.gui_layout.addWidget(fx_ssao_enable_conical_button)
+
+fx_outline = viewer.add_post_processing(
+    OutlineEffect, "depthnormal"
+)  # , (0.5, 0.5, 0))
+fx_outline_button = QCheckBox("outline")
+fx_outline_button.setChecked(True)
+fx_outline_button.stateChanged.connect(fx_outline.toggle)
+viewer.gui_layout.addWidget(fx_outline_button)
+
+fx_dof = viewer.add_post_processing(DOFEffect, blurAmount=90, inFocus=20, PPM=20)
+fx_dof_button = QCheckBox("Depth of field")
+fx_dof_button.setChecked(True)
+fx_dof_button.stateChanged.connect(fx_dof_button.toggle)
+viewer.gui_layout.addWidget(fx_dof_button)
+
+fx_fxaa = viewer.add_post_processing(FXAAEffect)
+fx_fxaa_button = QCheckBox("fxaa")
+fx_fxaa_button.setChecked(True)
+fx_fxaa_button.stateChanged.connect(fx_fxaa.toggle)
+viewer.gui_layout.addWidget(fx_fxaa_button)
+
+fx_fog = viewer.add_post_processing(FOGEffect, 0.01, [1, 1, 1, 1], 1)
+fx_fog_button = QCheckBox("fog")
+fx_fog_button.setChecked(True)
+fx_fog_button.stateChanged.connect(fx_fog.toggle)
+viewer.gui_layout.addWidget(fx_fog_button)
+
+fx_gamma = viewer.add_post_processing(GammaCorrectionEffect)
+
+fx_fog_slider = QSlider(Qt.Orientation.Horizontal)
+fx_fog_slider.setRange(0, 5000)
+fx_fog_slider.setSingleStep(1)
+fx_fog_slider.setValue(int(fx_fog.fogDensity) * 10000)
+
+
+def animate_fog(newval):
+    # print(v.widget.width(),v.widget.height())
+    fx_fog.set_options(fogDensity=newval / 10000.0, fogMode=1)
+    # v.update()
+    viewer.widget.repaint()
+    # print(fog,fog.fogDensity)
+
+
+fx_fog_slider.valueChanged.connect(animate_fog)
+# v.widget.uis.append(sld)
+viewer.gui_layout.addWidget(QLabel("fog density"))
+viewer.gui_layout.addWidget(fx_fog_slider)
+# ------------------------------------------------------------------
+
+fx_dof_slider_focus = QSlider(Qt.Orientation.Horizontal)
+fx_dof_slider_focus.setRange(0, 1000)
+fx_dof_slider_focus.setSingleStep(1)
+fx_dof_slider_focus.setValue(fx_dof.inFocus)
+
+fx_dof_slider_ppm = QSlider(Qt.Orientation.Horizontal)
+fx_dof_slider_ppm.setRange(0, 1000)
+fx_dof_slider_ppm.setSingleStep(1)
+fx_dof_slider_ppm.setValue(fx_dof.PPM)
+
+
+def animate_dof_infocus(newval):
+    # print(v.widget.width(),v.widget.height())
+    value = newval / 100.0
+    print("DOF infocus", value)
+    fx_dof.set_options(inFocus=value, PPM=fx_dof_slider_ppm.value())
+    viewer.widget.repaint()
+
+
+def animate_dof_ppm(newval):
+    # print(v.widget.width(),v.widget.height())
+    value = newval / 100.0
+    print("DOF ppm", value)
+    fx_dof.set_options(PPM=value, inFocus=fx_dof_slider_focus.value())
+    viewer.widget.repaint()
+
+
+fx_dof_slider_focus.valueChanged.connect(animate_dof_infocus)
+viewer.gui_layout.addWidget(QLabel("DOF InFocus"))
+viewer.gui_layout.addWidget(fx_dof_slider_focus)
+
+fx_dof_slider_ppm.valueChanged.connect(animate_dof_ppm)
+viewer.gui_layout.addWidget(QLabel("DOF PPM"))
+viewer.gui_layout.addWidget(fx_dof_slider_ppm)
 
 # effect = v.add_post_processing(DOFEffect, 10,20,20)
-
-fxaa = v.add_post_processing(FXAAEffect)
-fxaa_b =  QCheckBox("fxaa")
-fxaa_b.setChecked(True)
-fxaa_b.stateChanged.connect(fxaa.toggle)
-v.gui_layout.addWidget(fxaa_b)
-
-fog = v.add_post_processing(FOGEffect, 0.01,[1,1,1,1],1)
-fog_b =  QCheckBox("fog")
-fog_b.setChecked(True)
-fog_b.stateChanged.connect(fog.toggle)
-v.gui_layout.addWidget(fog_b)
-
-#effect = v.add_post_processing(GammaCorrectionEffect)
-
-sld = QSlider(Qt.Orientation.Horizontal)
-sld.setRange(0.0, 500.0)
-sld.setSingleStep(1.0)
-sld.setValue(fog.fogDensity*10000.0)
-def animate(newval):
-    #print(v.widget.width(),v.widget.height())
-    fog.set_options(fogDensity=newval/10000.0, fogMode=1)
-    # v.update()
-    v.widget.repaint()
-    #print(fog,fog.fogDensity)
-    
-    
-sld.valueChanged.connect(animate)
-#v.widget.uis.append(sld)
-v.gui_layout.addWidget(QLabel("fog density"))
-v.gui_layout.addWidget(sld)
-
-#effect = v.add_post_processing(DOFEffect, 10,20,20)
 # effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0))
 # effect = v.add_post_processing(OutlineEffect, "depthnormal")  # , (0.5, 0.5, 0.5))
-#effect = v.add_post_processing(FXAAEffect)
-#effect = v.add_post_processing(GammaCorrectionEffect)
+# effect = v.add_post_processing(FXAAEffect)
+# effect = v.add_post_processing(GammaCorrectionEffect)
 
 wat = cdb.get("molecule", "example.water")
 # mol = cdb.get("molecule", "gromacs.spce")
@@ -162,10 +209,11 @@ wat = cdb.get("molecule", "example.water")
 cov_radii = cdb.get("data", "covalentdict")
 
 # df = datafile("3zje.pdb")
-df = datafile("tub.pdb")
+# df = datafile("tub.pdb")
+df = datafile("7eel.pdb")
 mol1 = df.read("molecule")
-bonds1 = mol1.bonds
-bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)
+# bonds1 = mol1.bonds
+# bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)
 # define receptor sphere radii to be used by the sphere picker (scaled covalent radius)
 radii1 = np.array([cov_radii[x] * 1.5 for x in mol1.type_array], dtype="float")
 
@@ -177,12 +225,12 @@ bonds2 = guess_bonds(mol2.r_array, mol2.type_array, threshold=0.1, maxradius=0.2
 # # sphere renderer (protein)
 protein_color = colors.default_atom_map.copy()
 protein_color["C"] = colors.lawn_green
-# protein_color = {"Xx": (0, 200, 255, 0)}
+protein_color = {"Xx": (0, 200, 255, 0)}
 # protein_color["C"] = (0, 200, 255, 0)
 
 ligand_color = {"C": colors.forest_green}
 
-prot_repr = v.add_renderer(
+prot_repr = viewer.add_renderer(
     AtomRenderer,
     mol1.r_array,
     mol1.type_array,
@@ -191,7 +239,7 @@ prot_repr = v.add_renderer(
 )
 
 # ball and stick renderer
-lig_repr = v.add_renderer(
+lig_repr = viewer.add_renderer(
     BallAndStickRenderer,
     # WireframeRenderer,
     mol2.r_array,
@@ -232,19 +280,19 @@ def toggle_bond_color(ar):
 
 
 # autocenter the view
-v.widget.camera.autozoom(mol2.r_array)
+viewer.widget.camera.autozoom(mol1.r_array)
 # l key center viewer on ligand
-v.key_actions[Qt.Key_L] = lambda: v.widget.camera.autozoom(mol2.r_array)
+viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
 # r key center viewer on receptor
-v.key_actions[Qt.Key_L] = lambda: v.widget.camera.autozoom(mol2.r_array)
-v.key_actions[Qt.Key_R] = lambda: v.widget.camera.autozoom(mol1.r_array)
-v.key_actions[Qt.Key_P] = lambda: v.widget.camera.autozoom(mol1.r_array)
+viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
+viewer.key_actions[Qt.Key_R] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
+viewer.key_actions[Qt.Key_P] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
 # v.key_actions[Qt.Key_T] = toggle_text
-v.key_actions[Qt.Key_O] = lambda: shrink_radii(prot_repr)
-v.key_actions[Qt.Key_I] = lambda: increase_radii(prot_repr)
-v.key_actions[Qt.Key_B] = lambda: toggle_bond_color(lig_repr)
-v.widget.clicked.connect(on_click)
-v.picker = SpherePicker(v.widget, mol1.r_array, radii1)
+viewer.key_actions[Qt.Key_O] = lambda: shrink_radii(prot_repr)
+viewer.key_actions[Qt.Key_I] = lambda: increase_radii(prot_repr)
+viewer.key_actions[Qt.Key_B] = lambda: toggle_bond_color(lig_repr)
+viewer.widget.clicked.connect(on_click)
+viewer.picker = SpherePicker(viewer.widget, mol1.r_array, radii1)
 # v.widget.keyPressEvent(on_press)
 
 # ar = v.add_renderer(LineRenderer, water.r_array, water.type_array, water.bonds)
@@ -258,5 +306,5 @@ v.picker = SpherePicker(v.widget, mol1.r_array, radii1)
 
 # df = datafile(sys.argv[1])
 # mol = df.read("system")
-v.run()
-#"""
+viewer.run()
+# """
