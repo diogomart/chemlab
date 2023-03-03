@@ -81,6 +81,8 @@ def load_trajectory(name, format=None, skip=1):
     .. seealso:: `chemlab.io.datafile`
 
     '''
+    print("notebook load_trajectory",name,format)
+    
     df = datafile(name, format=format)
 
     ret = {}

@@ -57,7 +57,7 @@ class QtMolecularViewer(QtViewer):
         # Sidebar definition        
         dock2 = QDockWidget()
 
-        self.status_bar = QLabel()
+        self.status_bar = QLabel("Statuts")
         
         self.ipython = QIPythonWidget()
         self.ipython.initialize()        
@@ -67,9 +67,9 @@ class QtMolecularViewer(QtViewer):
         vb.setSizeConstraint(QLayout.SetMaximumSize)
         
         self.traj_controls = TrajectoryControls()
-        vb.addWidget(self.traj_controls, 1)
-        vb.addWidget(self.ipython, 2)
-        vb.addWidget(self.status_bar, 0)
+        vb.addWidget(self.traj_controls)#, 1)
+        vb.addWidget(self.ipython)#, 2)
+        vb.addWidget(self.status_bar)#, 0)
         wrapper2.setLayout(vb)
         
         dock2.setWidget(wrapper2)
@@ -89,7 +89,9 @@ class QtMolecularViewer(QtViewer):
     def add_representation(self, Repr, system):
         self.system = system
         self.representation = Repr(self, system)
-        
+        if self.representation.confwidget : 
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.representation.confwidget)
+
     def on_click(self, evt):
         if self.representation is not None:
             self.representation.on_click(evt.x(), evt.y())

@@ -87,7 +87,7 @@ cdb = ChemlabDB()
 # v.run()
 
 # """
-viewer =QtMolecularViewer()# QtViewer()
+viewer =QtMolecularViewer()# QtViewer(new=True)
 viewer.widget.initializeGL()
 # v.shortcut = QShortcut(QKeySequence("Ctrl+O"), v)
 
@@ -132,52 +132,56 @@ fx_glow =  viewer.add_post_processing(GlowEffect)
 # effect = v.add_post_processing(FXAAEffect)
 # effect = v.add_post_processing(GammaCorrectionEffect)
 
-wat = cdb.get("molecule", "example.water")
-# mol = cdb.get("molecule", "gromacs.spce")
-# water = cdb.get("molecule", "example.norbornene")
-# water = cdb.get("molecule", "gromacs.urea")
+#load_remote_system('https://raw.github.com/chemlab/chemlab-testdata/master/water.gro', format='gro')
+#load_remote_trajectory('https://github.com/chemlab/chemlab-testdata/raw/master/trajout.xtc', format='xtc')
 
-cov_radii = cdb.get("data", "covalentdict")
+if False:
+    wat = cdb.get("molecule", "example.water")
+    # mol = cdb.get("molecule", "gromacs.spce")
+    # water = cdb.get("molecule", "example.norbornene")
+    # water = cdb.get("molecule", "gromacs.urea")
 
-# df = datafile("3zje.pdb")
-df = datafile("tub.pdb")
-# df = datafile("monster.pdb")
-mol1 = df.read("molecule")
-# bonds1 = mol1.bonds
-# bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)
-# define receptor sphere radii to be used by the sphere picker (scaled covalent radius)
-radii1 = np.array([cov_radii[x] * 1.5 for x in mol1.type_array], dtype="float")
+    cov_radii = cdb.get("data", "covalentdict")
+
+    # df = datafile("3zje.pdb")
+    df = datafile("tub.pdb")
+    # df = datafile("monster.pdb")
+    mol1 = df.read("molecule")
+    # bonds1 = mol1.bonds
+    # bonds1 = guess_bonds(mol1.r_array, mol1.type_array, threshold=0.1, maxradius=0.2)
+    # define receptor sphere radii to be used by the sphere picker (scaled covalent radius)
+    radii1 = np.array([cov_radii[x] * 1.5 for x in mol1.type_array], dtype="float")
 
 
-df = datafile("taxolh.pdb")
-mol2 = df.read("molecule")
-bonds2 = mol2.bonds
-bonds2 = guess_bonds(mol2.r_array, mol2.type_array, threshold=0.1, maxradius=0.2)
-# # sphere renderer (protein)
-protein_color = colors.default_atom_map.copy()
-#protein_color["C"] = colors.lawn_green
-#protein_color = {"Xx": (0, 200, 255, 0)}
-# protein_color["C"] = (0, 200, 255, 0)
+    df = datafile("taxolh.pdb")
+    mol2 = df.read("molecule")
+    bonds2 = mol2.bonds
+    bonds2 = guess_bonds(mol2.r_array, mol2.type_array, threshold=0.1, maxradius=0.2)
+    # # sphere renderer (protein)
+    protein_color = colors.default_atom_map.copy()
+    #protein_color["C"] = colors.lawn_green
+    #protein_color = {"Xx": (0, 200, 255, 0)}
+    # protein_color["C"] = (0, 200, 255, 0)
 
-ligand_color = {"C": colors.forest_green}
+    ligand_color = {"C": colors.forest_green}
 
-prot_repr = viewer.add_renderer(
-    AtomRenderer,
-    mol1.r_array,
-    mol1.type_array,
-    # shading="toon",
-    color_scheme=protein_color,
-)
+    prot_repr = viewer.add_renderer(
+        AtomRenderer,
+        mol1.r_array,
+        mol1.type_array,
+        # shading="toon",
+        color_scheme=protein_color,
+    )
 
-# ball and stick renderer
-lig_repr = viewer.add_renderer(
-    BallAndStickRenderer,
-    # WireframeRenderer,
-    mol2.r_array,
-    mol2.type_array,
-    bonds2,  # shading="toon"
-    # color_scheme=ligand_color,
-)
+    # ball and stick renderer
+    lig_repr = viewer.add_renderer(
+        BallAndStickRenderer,
+        # WireframeRenderer,
+        mol2.r_array,
+        mol2.type_array,
+        bonds2,  # shading="toon"
+        # color_scheme=ligand_color,
+    )
 
 # tu = None
 
@@ -210,20 +214,20 @@ def toggle_bond_color(ar):
     ar.br.update_colors(new_a, new_b)
 
 
-# autocenter the view
-viewer.widget.camera.autozoom(mol1.r_array)
-# l key center viewer on ligand
-viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
-# r key center viewer on receptor
-viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
-viewer.key_actions[Qt.Key_R] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
-viewer.key_actions[Qt.Key_P] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
-# v.key_actions[Qt.Key_T] = toggle_text
-viewer.key_actions[Qt.Key_O] = lambda: shrink_radii(prot_repr)
-viewer.key_actions[Qt.Key_I] = lambda: increase_radii(prot_repr)
-viewer.key_actions[Qt.Key_B] = lambda: toggle_bond_color(lig_repr)
-viewer.widget.clicked.connect(on_click)
-viewer.picker = SpherePicker(viewer.widget, mol1.r_array, radii1)
+    # autocenter the view
+    viewer.widget.camera.autozoom(mol1.r_array)
+    # l key center viewer on ligand
+    viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
+    # r key center viewer on receptor
+    viewer.key_actions[Qt.Key_L] = lambda: viewer.widget.camera.autozoom(mol2.r_array)
+    viewer.key_actions[Qt.Key_R] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
+    viewer.key_actions[Qt.Key_P] = lambda: viewer.widget.camera.autozoom(mol1.r_array)
+    # v.key_actions[Qt.Key_T] = toggle_text
+    viewer.key_actions[Qt.Key_O] = lambda: shrink_radii(prot_repr)
+    viewer.key_actions[Qt.Key_I] = lambda: increase_radii(prot_repr)
+    viewer.key_actions[Qt.Key_B] = lambda: toggle_bond_color(lig_repr)
+    viewer.widget.clicked.connect(on_click)
+    viewer.picker = SpherePicker(viewer.widget, mol1.r_array, radii1)
 # v.widget.keyPressEvent(on_press)
 
 # ar = v.add_renderer(LineRenderer, water.r_array, water.type_array, water.bonds)

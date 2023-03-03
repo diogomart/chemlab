@@ -126,7 +126,7 @@ def datafile(filename, mode="rb", format=None):
 
     filename = os.path.expanduser(filename)
     base, ext = os.path.splitext(filename)
-
+    print("datafile",filename,base,ext,format) 
     if format is None:
         hc = get_handler_class(ext)
     else:

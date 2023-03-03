@@ -73,9 +73,9 @@ class AnimationSlider(QSlider):
         super(AnimationSlider, self).mousePressEvent(event)
 
     def __pixelPosToRangeValue(self, pos):
-        opt = QtGui.QStyleOptionSlider()
+        opt = QStyleOptionSlider()
         self.initStyleOption(opt)
-        style = QtGui.QApplication.style()
+        style = QApplication.style()
 
         gr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderGroove, self)
         sr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderHandle, self)

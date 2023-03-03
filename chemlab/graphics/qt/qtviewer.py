@@ -324,37 +324,44 @@ class QtViewer(QMainWindow):
 
     """
 
-    def __init__(self):
+    def __init__(self, new = True):
         QMainWindow.__init__(self)
 
         # Pre-initializing an OpenGL context can let us use opengl
         # functions without having to show the window first...
         # context = QGLContext(QGLFormat(), None)
+        if new :
+            dock = QtWidgets.QDockWidget("3D View Options")
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
+            scroll = QtWidgets.QScrollArea()
+            dock.setWidget(scroll)
+            content = QtWidgets.QWidget()
+            scroll.setWidget(content)
+            scroll.setWidgetResizable(True)
+            self.gui_layout = QtWidgets.QVBoxLayout(content)
 
-        dock = QtWidgets.QDockWidget("3D View Options")
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
-        scroll = QtWidgets.QScrollArea()
-        dock.setWidget(scroll)
-        content = QtWidgets.QWidget()
-        scroll.setWidget(content)
-        scroll.setWidgetResizable(True)
-        self.gui_layout = QtWidgets.QVBoxLayout(content)
+            gl_dock = QtWidgets.QDockWidget("3D View")
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, gl_dock)
+            context = QGLContext(QGLFormat())
+            widget = QChemlabWidget(context, self)
+            widget.windows = self
+            context.makeCurrent()
+            
+            gl_dock.setWidget(widget)
+            
+            # self.setCentralWidget(gl_dock)
+            self.resize(1000, 800)
+            self.widget = widget
+            #self.controls.setWidget(central_widget)
+            #self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
+        else :
+            context = QGLContext(QGLFormat(), None)
+            widget = QChemlabWidget(context, self)
+            context.makeCurrent()
+            self.setCentralWidget(widget)
+            self.resize(1000, 800)
+            self.widget = widget
 
-        gl_dock = QtWidgets.QDockWidget("3D View")
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, gl_dock)
-        context = QGLContext(QGLFormat())
-        widget = QChemlabWidget(context, self)
-        widget.windows = self
-        context.makeCurrent()
-        
-        gl_dock.setWidget(widget)
-        
-        # self.setCentralWidget(gl_dock)
-        self.resize(1000, 800)
-        self.widget = widget
-        #self.controls.setWidget(central_widget)
-        #self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.controls)
-        
         self.key_actions = {}
 
     def run(self):

@@ -303,8 +303,8 @@ class QChemlabWidget(QGLWidget):
             self.clicked.emit(evt)
 
     def screen_to_normalized(self, x, y):
-        w = self.width()
-        h = self.height()
+        w = super().width()#self.width()
+        h = super().height()#self.height()
         return 2 * float(x) / w - 1.0, 1.0 - 2 * float(y) / h
 
     def mouseMoveEvent(self, evt):

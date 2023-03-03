@@ -1,11 +1,30 @@
 
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import *
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt
+
+import numpy as np
+import itertools
+
+from .obsarray import obsarray as obsarray
+from .state import SystemHiddenState, SystemSelectionState, ArrayState
+from .state import Selection
+from ...graphics.renderers import (SphereImpostorRenderer,
+                                   CylinderImpostorRenderer, AtomRenderer,
+                                   BondRenderer, BoxRenderer)
+from ...graphics import colors
+from ...graphics.pickers import SpherePicker, CylinderPicker
+from ...db import ChemlabDB
+from ...graphics.postprocessing import GlowEffect
+
 class VdWRepresentation(object):
     """User interaction with the molecule by using a
     Van Der Waals metaphor.
 
     """
-    hasSelection = QtCore.Signal()
-    noSelection = QtCore.Signal()
+    hasSelection = QtCore.pyqtSignal()#QtCore.Signal()
+    noSelection = QtCore.pyqtSignal()#QtCore.Signal()
     
     def __init__(self, viewer, system):
         super(VdWRepresentation, self).__init__()
@@ -43,15 +62,14 @@ class VdWRepresentation(object):
 
         cursel = self.selection
         
-        if len(cursel) == 0:
-            self.noSelection.emit()
-        else:
-            self.hasSelection.emit()
+        #if len(cursel) == 0:
+        #    self.noSelection.emit()
+        #else:
+        #    self.hasSelection.emit()
         
         self.highlight(self.selection)
     
     def scale_radii(self, selection, scale_factor):
-        
         self.renderer.radii = np.array(self.renderer.radii)
         self.renderer.radii[selection] = self.default_radii[selection] * scale_factor
         self.renderer.sr.update_radii(self.renderer.radii)
@@ -96,7 +114,8 @@ class VdWRepresentation(object):
     
     def on_click(self, x, y):
         x, y = self.viewer.widget.screen_to_normalized(x, y)
-        indices = self.picker.pick(x, y)
+        indices, screen_cord = self.picker.pick(x, y)
+        print("on_click",indices, screen_cord)
         if not indices:
             # Cancel selection
             self.make_selection([])
@@ -116,14 +135,18 @@ class VdWRepresentation(object):
 
     def get_widget(self):
         # A widget to control the representations
-        container = QtGui.QWidget()
+        dock = QDockWidget('<b>Van der Waals</b>')
+        scroll = QScrollArea()
+        dock.setWidget(scroll)
+        content = QWidget()
+        scroll.setWidget(content)
+        scroll.setWidgetResizable(True)
+        title = QLabel('<b>Van der Waals</b>')
         
-        title = QtGui.QLabel('<b>Van der Waals</b>')
-        
-        grid = QtGui.QGridLayout()
+        grid = QGridLayout()
         grid.addWidget(title, 0, 0, 1, 0, Qt.AlignLeft)
-        grid.addWidget(QtGui.QLabel('Radius'), 1, 0, Qt.AlignLeft)
-        spinner = QtGui.QDoubleSpinBox()
+        grid.addWidget(QLabel('Radius'), 1, 0, Qt.AlignLeft)
+        spinner = QDoubleSpinBox()
         spinner.setMaximum(3.0)
         spinner.setMinimum(0.1)
         spinner.setDecimals(1)
@@ -135,6 +158,6 @@ class VdWRepresentation(object):
         grid.setRowStretch(2, 1)
         spinner.valueChanged.connect(lambda val: self.scale_radii(self.selection, val))
         
-        container.setLayout(grid)
-        return container
+        content.setLayout(grid)
+        return dock
 

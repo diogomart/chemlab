@@ -1,4 +1,4 @@
-from chemlab.mviewer.representations import BallAndStickRepresentation
+from chemlab.mviewer.representations import BallAndStickRepresentation, VdWRepresentation
 from chemlab.graphics.qt.qttrajectory import format_time
 
 from .core import *
@@ -10,18 +10,22 @@ import numpy as np
 
 db = CirDB()
 
-def display_system(system, autozoom=True):
+def display_system(system, autozoom=True, style='cpk'):
     '''Display a `~chemlab.core.System` instance at screen'''
     viewer.clear()
-    viewer.add_representation(BallAndStickRepresentation, system)
-
+    if style == 'vdw' : 
+        viewer.add_representation(VdWRepresentation, system)
+    elif style == 'cpk' : 
+        viewer.add_representation(BallAndStickRepresentation, system)
+    else :
+        return
     if autozoom:
         autozoom_()
     
     viewer.update()
     msg(str(system))
 
-def display_molecule(mol, autozoom=True):
+def display_molecule(mol, autozoom=True, style='ball-and-stick'):
     '''Display a `~chemlab.core.Molecule` instance in the viewer.
 
     This function wraps the molecule in a system before displaying
@@ -29,7 +33,7 @@ def display_molecule(mol, autozoom=True):
 
     '''
     s = System([mol])
-    display_system(s, autozoom=True)
+    display_system(s, autozoom=autozoom, style=style)
 
 def autozoom():
     '''Find optimal camera zoom level for the current view.'''
@@ -48,7 +52,7 @@ def load_system(name, format=None):
     .. seealso:: `chemlab.io.datafile`
     
     '''
-    mol = datafile(name).read('system')
+    mol = datafile(name, format=format).read('system')
     display_system(mol)
 
 def load_molecule(name, format=None):
@@ -70,12 +74,12 @@ def load_remote_molecule(url, format=None):
         load_remote_molecule('https://raw.github.com/chemlab/chemlab-testdata/master/benzene.mol')
     
     '''
-    from urllib import urlretrieve
+    from urllib.request import urlretrieve
     
     filename, headers = urlretrieve(url)
     load_molecule(filename, format=format)
     
-def load_remote_system(url, format=None):
+def load_remote_system(url, format=None, dest_filename=None):
     '''Load a system from the remote location specified by *url*.
     
     **Example**
@@ -84,20 +88,21 @@ def load_remote_system(url, format=None):
     
         load_remote_system('https://raw.github.com/chemlab/chemlab-testdata/master/naclwater.gro')
     '''
-    from urllib import urlretrieve
+    from urllib.request import urlretrieve
     
-    filename, headers = urlretrieve(url)
+    filename, headers = urlretrieve(url, dest_filename)
     load_system(filename, format=format)
 
-def load_remote_trajectory(url, format=None):
+def load_remote_trajectory(url, format=None, dest_filename=None):
     '''Load a trajectory file from a remote location specified by *url*.
 
     .. seealso:: load_remote_system
     
     '''
-    from urllib import urlretrieve
+    print("load_remote_trajectory",url,format)
+    from urllib.request import urlretrieve
     filename, headers = urlretrieve(url)
-    load_trajectory(filename, format)
+    load_trajectory(filename, format=format)
 
 def write_system(filename, format=None):
     '''Write the system currently displayed to a file.'''
@@ -125,12 +130,13 @@ def goto_frame(frame):
 
 _frame_processors = []
 
-def load_trajectory(name, skip=1, format=None):
+def load_trajectory(name, format=None, skip=1):
     '''Load a trajectory file into chemlab. You should call this
     command after you load a `~chemlab.core.System` through
     load_system or load_remote_system.
 
     '''
+    print("display load_trajectory",name,format)
     df = datafile(name, format=format)
     dt, coords = df.read('trajectory', skip=skip)
     boxes = df.read('boxes')

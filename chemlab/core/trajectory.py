@@ -16,6 +16,7 @@ class Trajectory(object):
         setattr(self, name, value)
     
     def __getitem__(self, name):
+        print(self,name)
         return getattr(self, name)
         
     def at(self, frame, attributes=None):

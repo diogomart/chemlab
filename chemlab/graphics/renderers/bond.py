@@ -27,7 +27,6 @@ class BondRenderer(AbstractRenderer):
     def __init__(self, widget, bonds, r_array, type_array, radius=0.02,
                  style="cylinders", shading='phong'):
         #super(BondRenderer, self).__init__(widget)
-        
         self.bonds = bonds
         bounds_a, bounds_b = self._compute_bounds(r_array, bonds)
     
@@ -36,13 +35,14 @@ class BondRenderer(AbstractRenderer):
         colors_a = []
         colors_b = []
 
-        for i, j in bonds:
-            colors_a.append(
-                default_atom_map.get(type_array[i],
-                                 default_atom_map['Xx']))
-            colors_b.append(
-                default_atom_map.get(type_array[j],
-                                 default_atom_map['Xx']))
+        if bonds is not None :
+            for i, j in bonds:
+                colors_a.append(
+                    default_atom_map.get(type_array[i],
+                                    default_atom_map['Xx']))
+                colors_b.append(
+                    default_atom_map.get(type_array[j],
+                                    default_atom_map['Xx']))
 
         self.radii = radii
         self.colors_a = np.array(colors_a, 'uint8')
@@ -65,7 +65,8 @@ class BondRenderer(AbstractRenderer):
             raise Exception("Available backends: cylinders, lines")
     
     def _compute_bounds(self, r_array, bonds):
-        
+        if bonds == None:
+            return np.array([]), np.array([])
         if len(bonds) == 0:
             return np.array([]), np.array([])
         

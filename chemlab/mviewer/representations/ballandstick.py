@@ -45,7 +45,7 @@ class BallAndStickRepresentation(Model):
         self._callbacks = {} # TODO: This is because the model class doesnt work
         self.system = system
         self.viewer = viewer
-        
+        self.confwidget = None
         self.color_scheme = colors.default_atom_map
         
 
@@ -87,8 +87,8 @@ class BallAndStickRepresentation(Model):
         # User controls
         self.atom_picker = SpherePicker(self.viewer.widget, system.r_array,
                                         self.radii_state.array)
-        
-        self.bond_picker = CylinderPicker(self.viewer.widget,
+        if system.bonds != None:
+            self.bond_picker = CylinderPicker(self.viewer.widget,
                                           system.r_array.take(system.bonds, axis=0),
                                           self.bond_radii)
         
