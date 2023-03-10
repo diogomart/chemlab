@@ -135,7 +135,28 @@ fx_glow =  viewer.add_post_processing(GlowEffect)
 #load_remote_system('https://raw.github.com/chemlab/chemlab-testdata/master/water.gro', format='gro')
 #load_remote_trajectory('https://github.com/chemlab/chemlab-testdata/raw/master/trajout.xtc', format='xtc')
 
+
+
 if False:
+    from pdbecif.mmcif_io import CifFileReader
+    data = CifFileReader().read('7cgo.cif')
+    x = np.array(data['7CGO']['_atom_site']['Cartn_x']).astype(np.float)
+    y = np.array(data['7CGO']['_atom_site']['Cartn_y']).astype(np.float)
+    z = np.array(data['7CGO']['_atom_site']['Cartn_z']).astype(np.float)
+    type_array = data['7CGO']['_atom_site']['type_symbol']
+    r_array = np.column_stack((x, y, z))
+    protein_color = colors.default_atom_map.copy()
+
+    prot_repr = viewer.add_renderer(
+        AtomRenderer,
+        r_array,
+        type_array,
+        shading="toon",
+        color_scheme=protein_color,
+    )
+    prot_repr.update_radii(np.array(prot_repr.radii)*10.0)
+
+    viewer.widget.camera.autozoom(r_array)
     wat = cdb.get("molecule", "example.water")
     # mol = cdb.get("molecule", "gromacs.spce")
     # water = cdb.get("molecule", "example.norbornene")

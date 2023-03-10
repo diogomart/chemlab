@@ -52,8 +52,12 @@ class OutlineEffect(AbstractEffect):
 
         self.kind = {"depthnormal": 0, "depthonly": 1, "normalonly": 2}[kind]
         self.outline_color = np.array(color)
+        self.uScale = 1.0
+        self.uSample = 8
         self.uniforms={
             "kind":{"type":"i","min":0.0,"max":2.0,"default":0,"step":1.0},
+            "uScale":{"type":"f","min":0.0,"max":10.0,"default":1.0,"step":0.01},
+            "uSample":{"type":"i","min":1,"max":64,"default":2,"step":1},
         }
         self.uis=[]
         self.setUniformSlider()
@@ -72,6 +76,10 @@ class OutlineEffect(AbstractEffect):
             "1i",
             self.kind,
         )
+
+        set_uniform(self.quad_program, "uSample", "1i", self.uSample)
+
+        set_uniform(self.quad_program, "uScale", "1f", self.uScale)
 
         inv_projection = np.linalg.inv(self.widget.camera.projection)
 
