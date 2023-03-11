@@ -49,14 +49,14 @@ Optionally one can create a new environment such as with conda
 Tthen follow these steps to quickly install the code and get started:
 
     # create a virtual environment 
-    $ conda create --name chem lab
+    $ conda create --name chem lab python=3.10
     $ conda activate chemlab
 
     # clone the code
     $ git clone https://github.com/sforli/chemlab.git
 
     # install dependencies 
-    $ pip install pyqt5 cython pyopengl scipy dask h5py pillow six
+    $ pip install pyqt5 cython pyopengl scipy dask h5py pillow six pdbecif
 
     #compile C/C++ libs
     $ cd chemlab
