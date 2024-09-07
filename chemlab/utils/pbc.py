@@ -1,6 +1,6 @@
 import numpy as np
 import dask.array as da
-from collections import Sequence
+from collections.abc import Sequence
 
 
 def minimum_image(coords, pbc):

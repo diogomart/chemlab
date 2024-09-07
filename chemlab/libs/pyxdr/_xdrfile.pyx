@@ -1,5 +1,11 @@
 from __future__ import division
-cimport _xdrfile
+from ._xdrfile cimport XDRFILE
+from ._xdrfile cimport exdr_message
+from ._xdrfile cimport read_xtc_natoms
+from ._xdrfile cimport read_xtc
+from ._xdrfile cimport xdrfile_open
+from ._xdrfile cimport xdrfile_close
+from ._xdrfile cimport exdrENDOFFILE
 import numpy
 cimport numpy
 cimport cython
@@ -9,13 +15,13 @@ _xtcframe = namedtuple('_xtcframe', ('step', 'time', 'prec', 'box', 'coords'))
 
 class XDRError(RuntimeError):
     def __init__(self, msg, libxdr_errno):
-        self.args = [msg, libxdr_errno, _xdrfile.exdr_message[libxdr_errno]]
+        self.args = [msg, libxdr_errno, exdr_message[libxdr_errno]]
         
     def __str__(self):
         return '{} (libxdrfile error {:d}: {})'.format(*self.args[0:3])
 
 cdef class XTCReader:
-    cdef _xdrfile.XDRFILE *_xd
+    cdef XDRFILE *_xd
     cdef readonly char* name
     cdef readonly int natoms
 
@@ -31,10 +37,10 @@ cdef class XTCReader:
         cdef int rc
         path = path.encode('utf-8') # Python 3
         
-        rc = _xdrfile.read_xtc_natoms(path, &self.natoms)
+        rc = read_xtc_natoms(path, &self.natoms)
         if rc != 0:
             raise XDRError('could not open %r' % path, rc)
-        self._xd = _xdrfile.xdrfile_open(path, 'r')
+        self._xd = xdrfile_open(path, 'r')
         if self._xd is NULL:
             raise XDRError('could not open %r (after successfully reading natoms)'%path)
                 
@@ -42,7 +48,7 @@ cdef class XTCReader:
         cdef int rc
         if self._xd is not NULL:
             try:
-                rc = _xdrfile.xdrfile_close(self._xd)
+                rc = xdrfile_close(self._xd)
                 if rc != 0:
                     raise XDRError('could not close XTC file', rc)
             finally:
@@ -57,12 +63,12 @@ cdef class XTCReader:
         cdef numpy.ndarray[float, ndim=2] x = numpy.empty((self.natoms,3), numpy.float32)
         cdef int rc, step, 
         cdef int natoms = self.natoms
-        cdef _xdrfile.XDRFILE *xd = self._xd
+        cdef XDRFILE *xd = self._xd
     
         with nogil:                
-            rc = _xdrfile.read_xtc(xd, natoms, &step, &time, <float*> box.data, <rvec*> x.data, &prec)
+            rc = read_xtc(xd, natoms, &step, &time, <float*> box.data, <rvec*> x.data, &prec)
         if rc != 0:
-            if rc == _xdrfile.exdrENDOFFILE:
+            if rc == exdrENDOFFILE:
                 return None
             else:
                 raise XDRError('could not read XTC frame', rc)

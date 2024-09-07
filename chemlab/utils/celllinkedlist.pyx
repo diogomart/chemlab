@@ -5,7 +5,7 @@ cimport cython
 
 from scipy.sparse import dok_matrix
 
-from cdist cimport minimum_image_distance, sqrt
+from .cdist cimport minimum_image_distance, sqrt
 
 cdef int EMPTY = -1
 

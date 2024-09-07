@@ -65,7 +65,7 @@ class BondRenderer(AbstractRenderer):
             raise Exception("Available backends: cylinders, lines")
     
     def _compute_bounds(self, r_array, bonds):
-        if bonds == None:
+        if bonds is None:
             return np.array([]), np.array([])
         if len(bonds) == 0:
             return np.array([]), np.array([])

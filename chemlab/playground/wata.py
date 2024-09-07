@@ -140,6 +140,7 @@ fx_glow =  viewer.add_post_processing(GlowEffect)
 if False:
     from pdbecif.mmcif_io import CifFileReader
     data = CifFileReader().read('7cgo.cif')
+    print(data)
     x = np.array(data['7CGO']['_atom_site']['Cartn_x']).astype(np.float)
     y = np.array(data['7CGO']['_atom_site']['Cartn_y']).astype(np.float)
     z = np.array(data['7CGO']['_atom_site']['Cartn_z']).astype(np.float)
@@ -162,9 +163,10 @@ if False:
     # water = cdb.get("molecule", "example.norbornene")
     # water = cdb.get("molecule", "gromacs.urea")
 
-    cov_radii = cdb.get("data", "covalentdict")
 
     # df = datafile("3zje.pdb")
+if True:
+    cov_radii = cdb.get("data", "covalentdict")
     df = datafile("tub.pdb")
     # df = datafile("monster.pdb")
     mol1 = df.read("molecule")
@@ -260,7 +262,8 @@ def toggle_bond_color(ar):
 # )
 
 
-# df = datafile(sys.argv[1])
-# mol = df.read("system")
+#import sys
+#df = datafile(sys.argv[1])
+#mol = df.read("system")
 viewer.run()
 # """

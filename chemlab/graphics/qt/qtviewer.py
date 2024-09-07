@@ -74,7 +74,7 @@ class SlidersGroup(QWidget):
         #slidersLayout.addWidget(self.scrollBar)
         #slidersLayout.addWidget(self.dial)
         self.setLayout(slidersLayout)    
-        self.setRange(self.min,self.max)
+        self.setRange(int(self.min), int(self.max))
         self.setSingleStep(self.step)
 
     def sliderSetValue(self,*args):
@@ -98,7 +98,7 @@ class SlidersGroup(QWidget):
         
     def setValue(self, value):
         self.sliderSetValue(value)
-        self.valueSpinBox.setValue(value)
+        self.valueSpinBox.setValue(int(value))
         if self.stype == "float":
             signal = 'valueChanged(double)'
             self.fvalueChanged.emit(value)
@@ -110,7 +110,7 @@ class SlidersGroup(QWidget):
         if self.stype == "float":
             valuemin = valuemin * (1.0/self.step)
             valuemax = valuemax * (1.0/self.step)
-        self.slider.setRange(valuemin,valuemax)
+        self.slider.setRange(int(valuemin),int(valuemax))
         self.valueSpinBox.setRange(valuemin,valuemax)
         #self.scrollBar.setMinimum(value)
         #self.dial.setMinimum(value)
@@ -133,10 +133,10 @@ class SlidersGroup(QWidget):
         #self.dial.setInvertedAppearance(invert)    
 
     def setSingleStep(self,step):
-        self.valueSpinBox.setSingleStep(step)
+        self.valueSpinBox.setSingleStep(int(step))
         if self.stype == "float":
             step = step * (1.0/self.step)
-        self.slider.setSingleStep(step)
+        self.slider.setSingleStep(int(step))
         
     def value(self):
         v = self.slider.value()
